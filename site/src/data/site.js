@@ -29,9 +29,9 @@ export const SITE = {
     'moe p. wellington — ai art portfolio. art in the age of artificial reproduction, 2022–2026.',
   // TODO: echte profile eintragen (nur links, keine embeds/widgets)
   socials: [
-    { label: 'twitter/x', href: 'https://x.com/TODO' },
-    { label: 'instagram', href: 'https://instagram.com/TODO' },
-    { label: 'objkt', href: 'https://objkt.com/@TODO' },
+    { label: 'twitter/x', href: 'https://x.com/moepwellington' },
+    { label: 'instagram', href: 'https://www.instagram.com/moepwellington' },
+    { label: 'objkt', href: 'https://objkt.com/users/tz1YdveLn8id6Wk9X2JGsWsJj7qZodJ1XsKT/created' },
   ],
 };
 
