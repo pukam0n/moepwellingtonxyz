@@ -1,0 +1,33 @@
+{
+  "currency": "€",
+  "notice": "under construction — nothing is for sale yet.",
+  "items": [
+    {
+      "id": "print-untitled-13",
+      "title": "untitled 13 — print",
+      "detail": "A2 giclée · edition of 10 · signed",
+      "price": 120,
+      "status": "soon",
+      "link": "",
+      "work": "untitled-13"
+    },
+    {
+      "id": "print-untitled-16",
+      "title": "untitled 16 — print",
+      "detail": "A2 giclée · edition of 10 · signed",
+      "price": 120,
+      "status": "soon",
+      "link": "",
+      "work": "untitled-16"
+    },
+    {
+      "id": "zine-vol-1",
+      "title": "aar zine vol. 1",
+      "detail": "36 pages · riso print · 2022–2026 selection",
+      "price": 18,
+      "status": "soon",
+      "link": "",
+      "work": ""
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+---
+import Base from '../../layouts/Base.astro';
+import { url } from '../../data/site.js';
+---
+
+<Base title="info" breadcrumb="~/info">
+  <h1>info/</h1>
+  <div class="prose">
+    <ul style="list-style:none; margin-left:0">
+      <li><a href={url('/info/impressum/')}>impressum/</a></li>
+      <li><a href={url('/info/datenschutz/')}>datenschutz/</a></li>
+    </ul>
+  </div>
+</Base>

@@ -1,0 +1,13 @@
+---
+import Base from '../layouts/Base.astro';
+import { url } from '../data/site.js';
+---
+
+<Base title="404" breadcrumb="~/???">
+  <h1>404</h1>
+  <pre class="dim" style="margin-top:2rem">
+$ cd {'{requested-path}'}
+bash: cd: no such file or directory
+  </pre>
+  <p style="margin-top:1.5rem"><a href={url('/')}>&larr; back to ~/</a></p>
+</Base>

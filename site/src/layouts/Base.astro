@@ -1,0 +1,78 @@
+---
+import '../styles/global.css';
+import { SITE, url, GOATCOUNTER, OG_IMAGE } from '../data/site.js';
+import Tree from '../components/Tree.astro';
+
+const {
+  title = SITE.name,
+  description = SITE.description,
+  breadcrumb = '~',
+} = Astro.props;
+const fullTitle = title === SITE.name ? SITE.name : `${title} — ${SITE.name}`;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <title>{fullTitle}</title>
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site).href} />
+    <meta property="og:image" content={new URL(url(OG_IMAGE), Astro.site).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {GOATCOUNTER && (
+      <script is:inline async src="https://gc.zgo.at/count.js" data-goatcounter={`https://${GOATCOUNTER}.goatcounter.com/count`} />
+    )}
+    <script is:inline>
+      // theme vor first paint setzen, kein flackern
+      if (localStorage.getItem('theme') === 'alt')
+        document.documentElement.dataset.theme = 'alt';
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="inner">
+        <a class="brand" href={url('/classic/')}>moe p. wellington</a>
+        <span class="breadcrumb" set:html={breadcrumb} />
+        <a class="canvaslink" href={url('/')}>[canvas]</a>
+      </div>
+    </header>
+
+    <div class="shell">
+      <Tree />
+      <main>
+        <slot />
+      </main>
+    </div>
+
+    <footer class="bottom">
+      <div class="inner">
+        <span>© 2022–{new Date().getFullYear()} moe p. wellington</span>
+        {SITE.socials.map((s) => <a href={s.href} rel="me noopener">{s.label}</a>)}
+        <span class="spacer"></span>
+        <button class="altview" type="button">[alt view]</button>
+        <a href={url('/info/')}>info</a>
+      </div>
+    </footer>
+
+    <script is:inline>
+      document.querySelector('.altview')?.addEventListener('click', () => {
+        const root = document.documentElement;
+        const alt = root.dataset.theme === 'alt';
+        if (alt) {
+          delete root.dataset.theme;
+          localStorage.removeItem('theme');
+        } else {
+          root.dataset.theme = 'alt';
+          localStorage.setItem('theme', 'alt');
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,18 @@
+---
+// die canvas-ansicht ist zur startseite geworden — alte url leitet weiter
+import { url } from '../../data/site.js';
+const target = url('/');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="refresh" content={`0;url=${target}`} />
+    <link rel="canonical" href={target} />
+    <title>canvas — moved</title>
+  </head>
+  <body>
+    <a href={target}>canvas is now the homepage &rarr;</a>
+  </body>
+</html>

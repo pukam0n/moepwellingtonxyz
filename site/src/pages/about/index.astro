@@ -1,0 +1,37 @@
+---
+import Base from '../../layouts/Base.astro';
+import { SITE } from '../../data/site.js';
+---
+
+<Base title="about" breadcrumb="~/about">
+  <h1>about</h1>
+  <div class="prose">
+    <p>
+      i'm moe p. wellington, a 31-year-old artist from germany. since early
+      2022, i've been experimenting with ai-assisted image-making in different
+      forms.
+    </p>
+    <p>
+      the recent work begins with a contradiction: the interface is a system
+      designed for human comprehension, while the model encounters it without
+      use, intention or literacy.
+    </p>
+    <p>
+      i ask machines to reconstruct the visual language of operation without
+      access to the logic it was built to communicate. what remains is a kind
+      of false memory of software. worlds that seem navigable but refuse to
+      explain themselves. i'm interested in the sensation of encountering games
+      as a child, before their symbols had settled into meaning. information
+      before literacy. systems before understanding.
+      <em>the work of art in the age of artificial reproduction.</em>
+    </p>
+
+    <h2>contact</h2>
+    <p>no contact form here. find me on:</p>
+    <ul>
+      {SITE.socials.map((s) => (
+        <li><a href={s.href} rel="me noopener">{s.label}</a></li>
+      ))}
+    </ul>
+  </div>
+</Base>

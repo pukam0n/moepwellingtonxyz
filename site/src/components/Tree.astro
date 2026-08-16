@@ -1,0 +1,44 @@
+---
+import { SITE, years, url } from '../data/site.js';
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const link = (href, label) => {
+  const h = url(href).replace(/\/$/, '') || '/';
+  const active = path === h;
+  return active
+    ? `<a href="${url(href)}" aria-current="page">${label}</a>`
+    : `<a href="${url(href)}">${label}</a>`;
+};
+const d = (s) => `<span class="dim">${s}</span>`;
+const seriesBase = `/${SITE.seriesSlug}`;
+
+const lines = [
+  d('~/') + link('/classic/', 'moe-p-wellington'),
+  d('│'),
+  d('├── ') + d(`<span title="${SITE.seriesSlug}/">art-in-the-age-of…/</span>`),
+  ...years.map(
+    (y, i) =>
+      d('│   ' + (i === years.length - 1 ? '└── ' : '├── ')) +
+      link(`${seriesBase}/${y}/`, `${y}/`)
+  ),
+  d('│'),
+  d('├── ') + link('/', 'canvas/') + d(' [node view · default]'),
+  d('├── ') + link('/selected-works/', 'selected-works/'),
+  d('├── ') + link('/character-creator/', 'character-creator/') + d(' [wip]'),
+  d('├── ') + link('/about/', 'about/'),
+  d('└── ') + link('/info/', 'info/'),
+];
+---
+
+<nav class="tree" aria-label="site navigation">
+  <details open>
+    <summary>menu</summary>
+    <pre set:html={lines.join('\n')} />
+  </details>
+</nav>
+
+<script is:inline>
+  // auf schmalen screens startet das menü eingeklappt
+  if (window.matchMedia('(max-width: 820px)').matches)
+    document.querySelector('nav.tree details')?.removeAttribute('open');
+</script>

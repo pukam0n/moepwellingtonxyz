@@ -1,0 +1,1039 @@
+---
+// startseite: node-canvas im stil von "ai artist 208" / comfyui.
+// root-fenster ist die schaltzentrale: jahres-fenster + character-creator
+// lassen sich dort an-/abschalten. viewer + about sind resizable.
+// canvas-, fenster- und kabelfarbe einzeln einstellbar (localStorage).
+import { SITE, works, years, worksByYear, featuredWorks, animations, url, GOATCOUNTER, OG_IMAGE } from '../data/site.js';
+import store from '../data/store.json';
+
+const workBySlug = Object.fromEntries(works.map((w) => [w.slug, w]));
+const storeItems = store.items.map((it) => ({
+  ...it,
+  thumb: it.work && workBySlug[it.work] ? workBySlug[it.work].thumb : null,
+}));
+
+const yearsDesc = [...years].reverse();
+// versteckte animationen (z. b. reality) tauchen nirgends auf — auch nicht bei rnd
+const visibleAnims = animations.filter((a) => !a.hidden);
+// animationen zählen zu ihrem jahr dazu (einmal — keine dubletten)
+const byYearAll = (y) => [...worksByYear(y), ...visibleAnims.filter((a) => a.year === y)];
+const yearData = yearsDesc.map((y) => ({ year: y, works: byYearAll(y) }));
+const allWorks = [...works, ...visibleAnims];
+const worksJson = JSON.stringify({
+  all: allWorks,
+  featured: featuredWorks,
+  byYear: Object.fromEntries(years.map((y) => [y, byYearAll(y)])),
+  animations: visibleAnims,
+});
+const g = (n) => '▓▒░■□▪ΘΞ§'.split('').sort(() => 0.5 - Math.sin(n * 7)).slice(0, n).join('');
+
+// unterer teil des root-baums: seiten-links + linktree (ersetzt das menü)
+const bottomTree = [
+  `├── <a href="${url('/selected-works/')}">selected-works/</a>`,
+  `├── <a href="${url('/about/')}">about/</a>`,
+  `├── <a href="${url('/info/')}">info/</a>`,
+  '│',
+  '└── links/',
+  ...SITE.socials.map(
+    (s, i) =>
+      `    ${i === SITE.socials.length - 1 ? '└──' : '├──'} <a href="${s.href}" rel="me noopener" target="_blank">${s.label} ↗</a>`
+  ),
+].join('\n');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={SITE.description} />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <title>{SITE.name}</title>
+    <meta property="og:title" content={SITE.name} />
+    <meta property="og:description" content={SITE.description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={new URL(url('/'), Astro.site).href} />
+    <meta property="og:image" content={new URL(url(OG_IMAGE), Astro.site).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    {GOATCOUNTER && (
+      <script is:inline async src="https://gc.zgo.at/count.js" data-goatcounter={`https://${GOATCOUNTER}.goatcounter.com/count`} />
+    )}
+  </head>
+  <body>
+    <div id="topbar">
+      <span class="tb-title">moe p. wellington</span>
+      <span class="sp"></span>
+      <button id="helpbtn" title="controls">?</button>
+      <a href={url('/classic/')}>classic view</a>
+      <a href={url('/about/')}>about</a>
+      <a href={url('/info/')}>info</a>
+    </div>
+
+    <div id="helpwin" class="hidden">
+      <div class="win-title">▒ controls ░</div>
+      <pre>drag background ··· pan
+mouse wheel ······· zoom
+drag title bar ···· move window
+drag corner grip ·· resize window
+click year row ···· open/close window
+click artwork ····· fullscreen (←/→, esc)</pre>
+    </div>
+
+    <div id="vp">
+      <div id="canvas">
+        <svg id="cables" aria-hidden="true"></svg>
+
+        <div class="win" id="win-root" style="left:70px; top:80px; width:340px">
+          <div class="win-title"><span class="sq r"></span><span class="sq b"></span> ▓▒ ~/moe-p-wellington ░▓▓</div>
+          <pre class="tree">~/moe-p-wellington
+│
+├── art-in-the-age-of-artificial-
+│   reproduction_2022-2026/</pre>
+          <div class="toggles">
+            {yearsDesc.map((y, i) => (
+              <button
+                class="trow"
+                data-win={`win-${y}`}
+              >│   {i === yearsDesc.length - 1 ? '└──' : '├──'} <span class="ind">[ ]</span> {y}/ <span class="dim">({byYearAll(y).length})</span></button>
+            ))}
+            <pre class="tree">│</pre>
+            <pre class="tree">├── ai-animations/</pre>
+            {visibleAnims.map((a, i) =>
+              a.slug === 'proxy' ? (
+                <button class="trow" data-win="win-proxy">│   {i === visibleAnims.length - 1 ? '└──' : '├──'} <span class="ind">[ ]</span> {a.title} <span class="dim">({a.year})</span></button>
+              ) : (
+                <button class="animrow trow" data-anim={a.slug}>│   {i === visibleAnims.length - 1 ? '└──' : '├──'} <span class="ind">▶</span> {a.title} <span class="dim">({a.year})</span></button>
+              )
+            )}
+            <pre class="tree">│</pre>
+            <button class="trow" data-win="win-cc">├── <span class="ind">[ ]</span> character-creator/</button>
+            <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
+            <button class="trow" data-win="win-store">├── <span class="ind">[ ]</span> store/ <span class="dim">[soon]</span></button>
+            <button class="trow" data-win="win-activity">├── <span class="ind">[ ]</span> activity.log</button>
+            <pre class="tree">│</pre>
+          </div>
+          <pre class="tree" set:html={bottomTree} />
+          <button class="loadbtn" data-load="featured">load selected-works →</button>
+          <button class="loadbtn" data-load="all">load all {allWorks.length} works →</button>
+        </div>
+
+        {yearData.map(({ year, works: yw }, i) => (
+          <div
+            class={`win yearwin togglable${i % 2 ? ' alt' : ''}${i === 0 ? '' : ' hidden'}`}
+            id={`win-${year}`}
+            style={`left:510px; top:${80 + i * 245}px; width:240px`}
+          >
+            <div class="win-title"><span class="sq y"></span> {g(2)} {year}/ {g(3)}</div>
+            <div class="thumbrow">
+              {yw.slice(0, 3).map((w) => (
+                <img src={w.thumb} alt={w.title} loading="lazy" width="64" height="64" />
+              ))}
+            </div>
+            <div class="dim small">{yw.length} works</div>
+            <button class="loadbtn" data-load={String(year)}>load {year} →</button>
+          </div>
+        ))}
+
+        <div class="win resizable" id="win-viewer" style="left:800px; top:75px; width:680px">
+          <div class="win-title"><span class="sq r"></span><span class="sq b"></span> ▓░ VIEWER ── selected-works ░▒▓ <span class="sq y"></span></div>
+          <div class="vbar">
+            <span class="dim small">windows:</span>
+            <input type="range" id="slots" min="1" max="4" step="1" value="1" />
+            <span id="slotcount">1</span>
+            <span class="sp"></span>
+            <button id="vrnd" class="tinybtn" title="random work">rnd ⚂</button>
+            <button id="vprev" class="tinybtn">← prev</button>
+            <span id="vpage" class="dim small">1/1</span>
+            <button id="vnext" class="tinybtn">next →</button>
+          </div>
+          <div id="vslots" data-slots="1"></div>
+          <div class="dim small" id="vsrc">source: selected-works</div>
+          <div class="grip" title="resize"></div>
+        </div>
+
+        <div class="win alt togglable hidden" id="win-cc" style="left:510px; top:1360px; width:250px">
+          <div class="win-title"><span class="sq b"></span> ▒ character-creator ░</div>
+          <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
+        </div>
+
+        <div class="win alt resizable" id="win-about" style="left:70px; top:825px; width:340px">
+          <div class="win-title"><span class="sq y"></span> ▓ about ▒░</div>
+          <p class="small">
+            i'm moe p. wellington, a 31-year-old artist from germany. since early
+            2022, i've been experimenting with ai-assisted image-making in
+            different forms.
+          </p>
+          <p class="small">
+            the recent work begins with a contradiction: the interface is a system
+            designed for human comprehension, while the model encounters it
+            without use, intention or literacy.
+          </p>
+          <p class="small">
+            i ask machines to reconstruct the visual language of operation without
+            access to the logic it was built to communicate. what remains is a
+            kind of false memory of software. worlds that seem navigable but
+            refuse to explain themselves. i'm interested in the sensation of
+            encountering games as a child, before their symbols had settled into
+            meaning. information before literacy. systems before understanding.
+            <em>the work of art in the age of artificial reproduction.</em>
+          </p>
+          <a class="small" href={url('/about/')}>statement + socials →</a>
+          <div class="grip" title="resize"></div>
+        </div>
+
+        <div class="win" id="win-info" style="left:70px; top:1280px; width:280px">
+          <div class="win-title"><span class="sq r"></span> ░ info ▒▒</div>
+          <p class="small"><a href={url('/info/impressum/')}>impressum</a> · <a href={url('/info/datenschutz/')}>datenschutz</a></p>
+          <p class="dim small">© 2022–2026 moe p. wellington</p>
+        </div>
+
+        <div class="win togglable hidden" id="win-gen" style="left:1640px; top:500px; width:300px">
+          <div class="win-title"><span class="sq r"></span> ▓▒ generate.exe ░▒</div>
+          <div class="small dim">prompt:</div>
+          <input id="genprompt" type="text" value="dense pseudo-os collage, surreal core motif" spellcheck="false" />
+          <button id="genbtn">GENERATE</button>
+          <pre id="genlog" class="small dim">ready. model: mpw-diffusion-v0.8 (local)</pre>
+        </div>
+
+        <div class="win togglable hidden resizable" id="win-store" style="left:1630px; top:700px; width:330px">
+          <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓░ store/ ▒░▓</div>
+          {storeItems.map((it) => (
+            <div class="stitem">
+              {it.thumb && <img src={it.thumb} alt="" loading="lazy" width="52" height="52" />}
+              <div class="stinfo">
+                <div class="small">{it.title}</div>
+                <div class="small dim">{it.detail}</div>
+              </div>
+              <div class="stbuy">
+                <div class="stprice">{it.price}{store.currency}</div>
+                {it.status === 'available' && it.link
+                  ? <a class="buybtn" href={it.link} rel="noopener">buy →</a>
+                  : <span class="stflag">[{it.status === 'sold_out' ? 'sold out' : 'soon'}]</span>}
+              </div>
+            </div>
+          ))}
+          <p class="small dim stnotice">{store.notice}</p>
+          <p class="small dim">checkout will run via stripe — no account, no tracking on this site.</p>
+          <div class="grip" title="resize"></div>
+        </div>
+
+        <div class="win alt togglable hidden" id="win-proxy" style="left:1650px; top:140px; width:330px">
+          <div class="win-title"><span class="sq b"></span><span class="sq r"></span> ▒▓ proxy.param ░</div>
+          <img class="proxyimg" src={animations.find((a) => a.slug === 'proxy')?.image} alt="proxy — animation, 2026" loading="lazy" />
+          <pre class="small dim">signal: live · 76 frames · loop
+proxy, 2026 — the artwork as
+an abstract parameter.</pre>
+        </div>
+
+        <div class="win alt togglable" id="win-activity" style="left:1640px; top:80px; width:300px" data-gc={GOATCOUNTER}>
+          <div class="win-title"><span class="sq y"></span> ▒ archive activity ░▓</div>
+          <svg id="actgraph" viewBox="0 0 280 56" width="100%" aria-hidden="true"></svg>
+          <div class="small" id="actline">measuring…</div>
+          <div class="small dim" id="actsub"></div>
+        </div>
+
+        <div class="win alt" id="win-settings" style="left:1640px; top:290px; width:300px">
+          <div class="win-title"><span class="sq b"></span><span class="sq y"></span> ▒▓ settings.cfg ░</div>
+          <div class="small">canvas:</div>
+          <div class="swrow" id="bgswatches">
+            <button class="swatch" data-v="" title="default blue" style="background:#1e56b0"></button>
+            <button class="swatch" data-v="#1a1a1a" title="comfy black" style="background:#1a1a1a"></button>
+            <button class="swatch" data-v="#242424" title="graphite" style="background:#242424"></button>
+            <button class="swatch" data-v="#0d1b3e" title="deep navy" style="background:#0d1b3e"></button>
+            <button class="swatch" data-v="#008080" title="win teal" style="background:#008080"></button>
+            <button class="swatch" data-v="#0d2626" title="dark teal" style="background:#0d2626"></button>
+            <button class="swatch" data-v="#f4f2ec" title="paper" style="background:#f4f2ec"></button>
+          </div>
+          <div class="small">windows:</div>
+          <div class="swrow" id="winswatches">
+            <button class="swatch" data-v="" title="mixed (yellow + grey)" style="background:linear-gradient(135deg,#d9cd4e 0 50%,#e9e4cf 50%)"></button>
+            <button class="swatch" data-v="#d9cd4e" title="yellow" style="background:#d9cd4e"></button>
+            <button class="swatch" data-v="#e9e4cf" title="grey/cream" style="background:#e9e4cf"></button>
+            <button class="swatch" data-v="#b9bdb2" title="grey" style="background:#b9bdb2"></button>
+            <button class="swatch" data-v="#d9a441" title="ocker" style="background:#d9a441"></button>
+            <button class="swatch" data-v="#f4f2ec" title="paper" style="background:#f4f2ec"></button>
+          </div>
+          <div class="small">cables:</div>
+          <div class="swrow" id="cableswatches">
+            <button class="swatch" data-v="" title="default blue" style="background:#1233c8"></button>
+            <button class="swatch" data-v="#4a90d9" title="light blue" style="background:#4a90d9"></button>
+            <button class="swatch" data-v="#c81111" title="red" style="background:#c81111"></button>
+            <button class="swatch" data-v="#57c94f" title="green" style="background:#57c94f"></button>
+            <button class="swatch" data-v="#ffe94d" title="yellow" style="background:#ffe94d"></button>
+            <button class="swatch" data-v="#e8e6de" title="white" style="background:#e8e6de"></button>
+            <button class="swatch" data-v="#0a0a0a" title="black" style="background:#0a0a0a"></button>
+            <button class="swatch" data-v="__mix" title="mixed" style="background:linear-gradient(135deg,#e0473b 0 25%,#e8c84d 25% 50%,#57c94f 50% 75%,#4a90d9 75%)"></button>
+            <button class="swatch" data-v="__neon" title="mixed · neon" style="background:linear-gradient(135deg,#ff6ad5 0 25%,#5ad0e0 25% 50%,#c77dff 50% 75%,#8dff5a 75%)"></button>
+            <button class="swatch" data-v="__chrome" title="mixed · chrome" style="background:linear-gradient(135deg,#d8dbe2 0 25%,#9aa3b0 25% 50%,#6b7280 50% 75%,#c0c6d0 75%)"></button>
+          </div>
+          <button class="tinybtn" id="swreset">reset</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- gelocktes charakter-fenster: fix in der ecke, unabhängig von der kamera -->
+    <div id="charwin" class="hidden" title="edit character" data-spritebase={url('/sprites/')} data-href={url('/character-creator/')}>
+      <div class="win-title"><span class="sq y"></span> ▒ you ░</div>
+      <img id="charimg" alt="your character" width="256" height="256" />
+      <div id="charname" class="small"></div>
+      <div id="charclass" class="small dim"></div>
+      <div id="charno" class="small dim"></div>
+    </div>
+
+    <div id="zoomctl">
+      <button id="zoomout">−</button>
+      <span id="zoomlvl">100%</span>
+      <button id="zoomin">+</button>
+      <button id="zoomfit" title="fit everything into view">fit</button>
+    </div>
+
+    <dialog id="lb">
+      <div class="lbframe">
+        <img alt="" />
+        <div class="lbbar">
+          <button data-nav="-1">← prev</button>
+          <span id="lbtitle"></span>
+          <button data-nav="1">next →</button>
+          <button id="lbrnd" title="random work from current selection">rnd ⚂</button>
+          <button id="lbclose">esc close</button>
+        </div>
+      </div>
+    </dialog>
+
+    <script type="application/json" id="works-data" set:html={worksJson} />
+
+    <style is:global>
+      @font-face {
+        font-family: 'VT323';
+        src: url('../fonts/VT323-Regular.ttf') format('truetype');
+        font-display: swap;
+      }
+      :root {
+        --bg: #1e56b0;
+        --win: #d9cd4e;
+        --win-alt: #e9e4cf;
+        --cable: #1233c8;
+        --border: #101010;
+        --shadow: #071c4a;
+        --text: #262104;
+        --yb: #ffe94d;
+        --tb: #c9c9c9;
+        --tb-hi: #efefef;
+        --tb-lo: #7d7d7d;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+      html, body {
+        font-family: 'VT323', ui-monospace, monospace;
+        font-size: 18px;
+        line-height: 1.3;
+        color: var(--text);
+        background: var(--bg);
+        image-rendering: pixelated;
+        overscroll-behavior: none;
+      }
+      a { color: inherit; }
+      button { font: inherit; cursor: pointer; user-select: none; }
+      .hidden { display: none !important; }
+      .dim { opacity: 0.65; }
+      .small { font-size: 15px; }
+      .sp { flex: 1; }
+
+      /* topbar: klassische graue os-leiste — neutral zu jeder canvas-farbe */
+      #topbar {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 46px;
+        background: var(--tb); color: #1a1a1a;
+        border-bottom: 2px solid var(--border);
+        box-shadow: inset 0 2px 0 var(--tb-hi), inset 0 -2px 0 var(--tb-lo);
+        padding: 0 16px;
+        display: flex; gap: 14px; align-items: center;
+        white-space: nowrap; overflow: hidden;
+      }
+      /* vt323 hat keinen bold-schnitt — faux-bold sah kaputt aus, also regular + größer */
+      #topbar .tb-title { font-weight: normal; font-size: 24px; letter-spacing: 2px; }
+      #topbar a {
+        color: #1a1a1a; text-decoration: none; font-size: 16px;
+        background: var(--tb); border: 2px solid;
+        border-color: var(--tb-hi) var(--tb-lo) var(--tb-lo) var(--tb-hi);
+        padding: 0 8px; line-height: 22px;
+      }
+      #topbar a:hover { background: var(--tb-hi); }
+      #topbar a:active { border-color: var(--tb-lo) var(--tb-hi) var(--tb-hi) var(--tb-lo); }
+      #helpbtn {
+        width: 26px; height: 26px; line-height: 1; font-weight: bold;
+        background: var(--tb); border: 2px solid;
+        border-color: var(--tb-hi) var(--tb-lo) var(--tb-lo) var(--tb-hi);
+      }
+      #helpbtn:hover { background: var(--tb-hi); }
+      #helpbtn:active, #helpbtn.on { border-color: var(--tb-lo) var(--tb-hi) var(--tb-hi) var(--tb-lo); }
+      #helpwin {
+        position: fixed; top: 54px; right: 12px; z-index: 110; width: 330px;
+        background: var(--win-alt); border: 2px solid var(--border);
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45); padding: 8px 12px 12px;
+      }
+      #helpwin pre { font: inherit; font-size: 15px; }
+      #helpwin .win-title { margin: -2px -6px 8px; }
+
+      /* punktraster liegt auf dem viewport (nicht auf dem skalierten canvas):
+         js hält size/position synchron zu pan+zoom → unendlich + kein moiré */
+      #vp {
+        position: fixed; inset: 46px 0 0 0; overflow: hidden;
+        cursor: grab; touch-action: none;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+        background-size: 7px 7px;
+      }
+      #vp.panning { cursor: grabbing; }
+      #canvas {
+        position: absolute; width: 3200px; height: 2200px;
+        transform-origin: 0 0;
+      }
+      #cables { position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 5; overflow: visible; }
+
+      .win {
+        position: absolute; z-index: 10;
+        background-color: var(--win);
+        border: 2px solid var(--border);
+        box-shadow: 4px 4px 0 var(--shadow), inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+        background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.055) 0% 25%, transparent 0% 50%);
+        background-size: 6px 6px;
+        padding: 10px 12px 12px;
+      }
+      .win.alt { background-color: var(--win-alt); }
+      body.uniwin .win, body.uniwin .win.alt { background-color: var(--win); }
+      .win::before, .win::after {
+        content: ""; position: absolute; width: 9px; height: 9px;
+        background: var(--cable); border: 2px solid var(--border); top: 18px; z-index: 3;
+      }
+      .win::before { left: -7px; }
+      .win::after { right: -7px; }
+      .win-title {
+        color: var(--border); background: rgba(0, 0, 0, 0.1);
+        padding: 1px 6px; margin: -4px -6px 8px; cursor: move;
+        white-space: nowrap; overflow: hidden; user-select: none;
+      }
+      .sq { display: inline-block; width: 8px; height: 8px; margin: 0 2px; vertical-align: middle; border: 1px solid var(--border); }
+      .sq.r { background: #c81111; } .sq.b { background: #1233c8; } .sq.y { background: #ffe94d; }
+
+      .grip {
+        position: absolute; right: 0; bottom: 0; width: 18px; height: 18px;
+        cursor: nwse-resize; z-index: 4;
+        background: repeating-linear-gradient(135deg, transparent 0 3px, var(--border) 3px 5px);
+      }
+
+      .tree { font: inherit; font-size: 15px; white-space: pre; }
+      .tree a { color: var(--text); }
+      .tree a:hover { color: #1233c8; }
+      .toggles { display: flex; flex-direction: column; }
+      .trow {
+        display: block; width: 100%; text-align: left;
+        background: none; border: none; color: var(--text);
+        font: inherit; font-size: 15px; white-space: pre; padding: 0;
+        line-height: 1.45;
+      }
+      .trow:hover { background: rgba(0, 0, 0, 0.12); }
+      .trow .ind { font-weight: bold; }
+      .trow.on .ind { color: #1a7a12; }
+
+      .loadbtn, .tinybtn {
+        display: block; width: 100%; margin-top: 6px; padding: 2px 8px;
+        background: #efe9d8; border: 2px solid var(--border); color: #1a1503;
+        box-shadow: 3px 3px 0 var(--shadow); text-align: left;
+      }
+      .tinybtn { display: inline-block; width: auto; box-shadow: 2px 2px 0 var(--shadow); font-size: 15px; }
+      .loadbtn:active, .tinybtn:active { transform: translate(2px, 2px); box-shadow: none; }
+      .loadbtn.on { background: var(--border); color: var(--yb); }
+
+      /* generate.exe — gen-button aus dem spiel übernommen */
+      #genprompt {
+        display: block; width: 100%;
+        background: transparent; border: none; border-bottom: 2px solid rgba(0, 0, 0, 0.4);
+        font: inherit; font-size: 15px; color: var(--text); outline: none;
+        padding: 2px 0; caret-color: #c81111;
+      }
+      #genbtn {
+        display: block; width: 100%; margin-top: 10px;
+        font-size: 26px; letter-spacing: 4px; padding: 10px;
+        background: #c81111; color: #ffe94d; border: 2px solid var(--border);
+        box-shadow: 4px 4px 0 var(--shadow);
+        transition: transform 0.05s, box-shadow 0.05s, background 0.05s;
+      }
+      #genbtn.flash, #genbtn:active { background: #8f0b0b; transform: translateY(2px); box-shadow: 2px 2px 0 var(--shadow); }
+      #genbtn:disabled { opacity: 0.7; cursor: wait; }
+      @media (prefers-reduced-motion: reduce) { #genbtn.flash { transform: none; } }
+      #genlog { font: inherit; font-size: 14px; margin-top: 8px; min-height: 1.3em; white-space: pre-wrap; overflow-wrap: anywhere; }
+      #win-about p { margin-bottom: 8px; }
+      .ccline { font: inherit; font-size: 14px; }
+      .ccbtn {
+        display: block; text-align: center; text-decoration: none;
+        font-size: 20px; letter-spacing: 3px; padding: 8px;
+        background: #c81111; color: var(--yb); border: 2px solid var(--border);
+        box-shadow: 3px 3px 0 var(--shadow);
+      }
+      .ccbtn:active { transform: translate(2px, 2px); box-shadow: none; }
+
+      /* gelocktes charakter-fenster oben links (fixed, kamera-unabhängig) */
+      #charwin {
+        position: fixed; top: 58px; left: 12px; z-index: 90; width: 150px;
+        background-color: var(--win-alt); border: 2px solid var(--border);
+        box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45), inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+        background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.055) 0% 25%, transparent 0% 50%);
+        background-size: 6px 6px; padding: 8px 10px 10px; cursor: pointer;
+      }
+      #charwin .win-title { cursor: pointer; margin: -2px -4px 6px; }
+      #charimg {
+        display: block; width: 100%; height: auto;
+        border: 2px solid var(--border); background: #efe9d8;
+        image-rendering: pixelated; margin-bottom: 4px;
+      }
+      @media (max-width: 1100px) { #charwin { display: none; } }
+      .proxyimg {
+        display: block; width: 100%; height: auto;
+        border: 2px solid var(--border); background: #efe9d8;
+        box-shadow: 3px 3px 0 var(--shadow); margin-bottom: 6px;
+      }
+
+      /* archive activity */
+      #actgraph { display: block; margin-bottom: 6px; }
+      #actgraph rect { stroke: var(--border); stroke-width: 1.5; }
+
+      /* store */
+      .stitem {
+        display: flex; gap: 8px; align-items: center;
+        padding: 7px 0; border-top: 2px dashed rgba(0, 0, 0, 0.25);
+      }
+      .stitem:first-of-type { border-top: none; }
+      .stitem img { width: 52px; height: 52px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; flex-shrink: 0; }
+      .stinfo { flex: 1; min-width: 0; }
+      .stbuy { text-align: right; flex-shrink: 0; }
+      .stprice { font-size: 16px; }
+      .buybtn {
+        display: inline-block; padding: 1px 8px; text-decoration: none;
+        background: #c81111; color: #ffe94d; border: 2px solid var(--border);
+        box-shadow: 2px 2px 0 var(--shadow); font-size: 15px;
+      }
+      .buybtn:active { transform: translate(2px, 2px); box-shadow: none; }
+      .stflag { font-size: 14px; opacity: 0.6; }
+      .stnotice { margin-top: 8px; border-top: 2px solid rgba(0, 0, 0, 0.25); padding-top: 6px; }
+
+      .thumbrow { display: flex; gap: 6px; margin-bottom: 4px; }
+      .thumbrow img { width: 64px; height: 64px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; }
+
+      .vbar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+      #slots { width: 90px; accent-color: var(--cable); }
+      #vslots { display: grid; gap: 10px; }
+      #vslots[data-slots='1'] { grid-template-columns: 1fr; }
+      #vslots[data-slots='2'] { grid-template-columns: 1fr 1fr; }
+      #vslots[data-slots='3'] { grid-template-columns: 1fr 1fr 1fr; }
+      #vslots[data-slots='4'] { grid-template-columns: 1fr 1fr; }
+      #vslots figure { margin: 0; }
+      #vslots img {
+        display: block; width: 100%; height: auto; aspect-ratio: 1;
+        object-fit: cover; border: 2px solid var(--border);
+        background: #efe9d8; box-shadow: 3px 3px 0 var(--shadow); cursor: zoom-in;
+      }
+      /* einzelansicht: echtes seitenverhältnis, kein beschnitt (hoch-/querformat ok) */
+      #vslots[data-slots='1'] img { aspect-ratio: auto; object-fit: contain; }
+      #vslots figcaption { font-size: 15px; padding-top: 2px; }
+      #vsrc { margin-top: 8px; }
+
+      .swrow { display: flex; gap: 5px; flex-wrap: wrap; margin: 4px 0 8px; }
+      .swatch { width: 17px; height: 17px; padding: 0; border: 2px solid #000; }
+      .swatch:hover, .swatch.on { outline: 2px solid #fff; }
+
+      #zoomctl {
+        position: fixed; right: 16px; bottom: 16px; z-index: 100;
+        display: flex; gap: 6px; align-items: center;
+        background: var(--tb); border: 2px solid var(--border);
+        box-shadow: inset 0 2px 0 var(--tb-hi), inset 0 -2px 0 var(--tb-lo), 4px 4px 0 rgba(0, 0, 0, 0.45);
+        padding: 5px 8px;
+      }
+      #zoomctl button {
+        padding: 0 9px; background: var(--tb); border: 2px solid;
+        border-color: var(--tb-hi) var(--tb-lo) var(--tb-lo) var(--tb-hi);
+      }
+      #zoomctl button:active { border-color: var(--tb-lo) var(--tb-hi) var(--tb-hi) var(--tb-lo); }
+      #zoomlvl { min-width: 44px; text-align: center; font-size: 15px; color: #1a1a1a; }
+
+      #lb { border: none; background: transparent; padding: 0; width: 100%; height: 100%; max-width: 100vw; max-height: 100dvh; }
+      #lb::backdrop { background: rgba(7, 28, 74, 0.94); }
+      .lbframe { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; padding: 24px; }
+      #lb img { max-width: min(1400px, 94vw); max-height: 82dvh; border: 2px solid var(--border); box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.5); background: #efe9d8; }
+      .lbbar { color: var(--yb); display: flex; gap: 16px; align-items: baseline; flex-wrap: wrap; justify-content: center; }
+      .lbbar button { background: transparent; border: 2px solid var(--yb); color: var(--yb); padding: 1px 8px; }
+      .lbbar button:hover { background: #1233c8; }
+
+      @media (max-width: 1100px) {
+        #vp { position: static; overflow: visible; height: auto; cursor: default; touch-action: auto; }
+        #canvas { position: static; width: auto; height: auto; transform: none !important; padding: 48px 12px 12px; }
+        .win { position: static !important; width: auto !important; max-width: 560px; margin: 0 auto 18px; }
+        .win::before, .win::after, #cables, #zoomctl, .grip { display: none !important; }
+        html, body { overscroll-behavior: auto; }
+      }
+    </style>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const DATA = JSON.parse($('works-data').textContent);
+      const vp = $('vp'), canvas = $('canvas'), cablesEl = $('cables');
+      const isWide = () => window.matchMedia('(min-width: 1101px)').matches;
+
+      // ---------- prefs (farben + offene fenster) ----------
+      const PREFS_KEY = 'canvasPrefs';
+      const prefs = JSON.parse(localStorage.getItem(PREFS_KEY) || '{}');
+      const savePrefs = () => localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+
+      // ---------- pan & zoom ----------
+      let z = 1, px = 0, py = 0;
+      const apply = () => {
+        canvas.style.transform = `translate(${px}px, ${py}px) scale(${z})`;
+        $('zoomlvl').textContent = Math.round(z * 100) + '%';
+        // raster mitführen; bei starkem rauszoomen abstand verdoppeln statt moiré
+        let gs = 7 * z;
+        while (gs < 5) gs *= 2;
+        vp.style.backgroundSize = `${gs}px ${gs}px`;
+        vp.style.backgroundPosition = `${px}px ${py}px`;
+      };
+      const setZoom = (nz, cx, cy) => {
+        nz = Math.min(1.6, Math.max(0.2, nz));
+        if (cx !== undefined) {
+          px = cx - ((cx - px) / z) * nz;
+          py = cy - ((cy - py) / z) * nz;
+        }
+        z = nz;
+        apply();
+      };
+      const fit = () => {
+        // info-fenster darf unten rausragen und wird bei der kamera ignoriert
+        const wins = [...document.querySelectorAll('.win')].filter(
+          (w) => !w.classList.contains('hidden') && w.id !== 'win-info'
+        );
+        if (!wins.length) return;
+        const minX = Math.min(...wins.map((w) => w.offsetLeft)) - 40;
+        const minY = Math.min(...wins.map((w) => w.offsetTop)) - 40;
+        const maxX = Math.max(...wins.map((w) => w.offsetLeft + w.offsetWidth)) + 40;
+        const maxY = Math.max(...wins.map((w) => w.offsetTop + w.offsetHeight)) + 40;
+        const r = vp.getBoundingClientRect();
+        z = Math.min(1.6, Math.max(0.2, Math.min(r.width / (maxX - minX), r.height / (maxY - minY))));
+        px = -minX * z + (r.width - (maxX - minX) * z) / 2;
+        py = -minY * z + (r.height - (maxY - minY) * z) / 2;
+        apply();
+      };
+      $('zoomin').onclick = () => setZoom(z * 1.15);
+      $('zoomout').onclick = () => setZoom(z / 1.15);
+      $('zoomfit').onclick = fit;
+      vp.addEventListener('wheel', (e) => {
+        if (!isWide()) return;
+        e.preventDefault();
+        const r = vp.getBoundingClientRect();
+        setZoom(z * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top);
+      }, { passive: false });
+
+      // pan / fenster-drag / resize
+      let mode = null, sx = 0, sy = 0, dragWin = null, ox = 0, oy = 0, startW = 0;
+      vp.addEventListener('pointerdown', (e) => {
+        if (!isWide()) return;
+        const grip = e.target.closest('.grip');
+        const title = e.target.closest('.win-title');
+        if (grip) {
+          mode = 'resize';
+          dragWin = grip.closest('.win');
+          startW = dragWin.offsetWidth;
+          sx = e.clientX;
+        } else if (title) {
+          mode = 'win';
+          dragWin = title.closest('.win');
+          ox = (e.clientX - px) / z - dragWin.offsetLeft;
+          oy = (e.clientY - py) / z - dragWin.offsetTop;
+        } else if (e.target === vp || e.target === canvas || e.target === cablesEl) {
+          mode = 'pan';
+          sx = e.clientX - px;
+          sy = e.clientY - py;
+          vp.classList.add('panning');
+        } else return;
+        vp.setPointerCapture(e.pointerId);
+      });
+      vp.addEventListener('pointermove', (e) => {
+        if (mode === 'pan') {
+          px = e.clientX - sx;
+          py = e.clientY - sy;
+          apply();
+        } else if (mode === 'win') {
+          dragWin.style.left = Math.max(0, (e.clientX - px) / z - ox) + 'px';
+          dragWin.style.top = Math.max(0, (e.clientY - py) / z - oy) + 'px';
+          drawCables();
+        } else if (mode === 'resize') {
+          const w = Math.min(1700, Math.max(320, startW + (e.clientX - sx) / z));
+          dragWin.style.width = w + 'px';
+          drawCables();
+        }
+      });
+      vp.addEventListener('pointerup', () => {
+        mode = null;
+        dragWin = null;
+        vp.classList.remove('panning');
+      });
+
+      // ---------- fenster an/aus über das root-fenster ----------
+      const openState = prefs.open || { 'win-2026': true, 'win-activity': true };
+      // neue standard-fenster für bestehende gespeicherte zustände nachrüsten
+      if (!('win-activity' in openState)) openState['win-activity'] = true;
+      function applyOpen() {
+        document.querySelectorAll('.togglable').forEach((w) =>
+          w.classList.toggle('hidden', !openState[w.id])
+        );
+        document.querySelectorAll('.trow[data-win]').forEach((b) => {
+          const on = !!openState[b.dataset.win];
+          b.querySelector('.ind').textContent = on ? '[x]' : '[ ]';
+          b.classList.toggle('on', on);
+        });
+        prefs.open = openState;
+        savePrefs();
+        drawCables();
+      }
+      document.querySelectorAll('.trow[data-win]').forEach((b) =>
+        b.addEventListener('click', () => {
+          openState[b.dataset.win] = !openState[b.dataset.win];
+          applyOpen();
+        })
+      );
+
+      // ---------- kabel: comfyui-style mit durchhang ----------
+      const PAIRS = [
+        ['win-root', 'win-2022'], ['win-root', 'win-2023'], ['win-root', 'win-2024'],
+        ['win-root', 'win-2025'], ['win-root', 'win-2026'],
+        ['win-2022', 'win-viewer'], ['win-2023', 'win-viewer'], ['win-2024', 'win-viewer'],
+        ['win-2025', 'win-viewer'], ['win-2026', 'win-viewer'],
+        ['win-root', 'win-cc'], ['win-viewer', 'win-settings'],
+        ['win-root', 'win-about', 'left'], ['win-about', 'win-info', 'left'],
+        ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
+        ['win-root', 'win-store'], ['win-store', 'win-info'],
+        ['win-viewer', 'win-activity'], ['win-activity', 'win-settings'],
+        ['win-viewer', 'win-proxy'],
+      ];
+      const CABLE_SETS = {
+        __mix: ['#e0473b', '#e8c84d', '#57c94f', '#4a90d9'],
+        __neon: ['#ff6ad5', '#5ad0e0', '#c77dff', '#8dff5a'],
+        __chrome: ['#d8dbe2', '#9aa3b0', '#6b7280', '#c0c6d0'],
+      };
+      function drawCables() {
+        if (!isWide()) { cablesEl.innerHTML = ''; return; }
+        const raw = prefs.cable || '';
+        const mixSet = CABLE_SETS[raw] || null;
+        const single = mixSet
+          ? null
+          : raw || getComputedStyle(document.documentElement).getPropertyValue('--cable').trim();
+        let html = '', ci = 0;
+        for (const [ai, bi, mode] of PAIRS) {
+          const A = $(ai), B = $(bi);
+          if (!A || !B) continue;
+          if (A.classList.contains('hidden') || B.classList.contains('hidden')) continue;
+          const color = mixSet ? mixSet[ci++ % mixSet.length] : single;
+          let d, x1, y1, x2, y2;
+          if (mode === 'left') {
+            // andersherum: links raus, bogen nach außen, links wieder rein
+            x1 = A.offsetLeft; y1 = A.offsetTop + 22;
+            x2 = B.offsetLeft; y2 = B.offsetTop + 22;
+            const bulge = 120;
+            d = `M${x1} ${y1} C${x1 - bulge} ${y1 + 50}, ${x2 - bulge} ${y2 - 50}, ${x2} ${y2}`;
+          } else {
+            const leftFirst = A.offsetLeft + A.offsetWidth / 2 <= B.offsetLeft + B.offsetWidth / 2;
+            x1 = leftFirst ? A.offsetLeft + A.offsetWidth : A.offsetLeft;
+            y1 = A.offsetTop + 22;
+            x2 = leftFirst ? B.offsetLeft : B.offsetLeft + B.offsetWidth;
+            y2 = B.offsetTop + 22;
+            const dx = x2 - x1, dir = dx >= 0 ? 1 : -1;
+            const dist = Math.hypot(dx, y2 - y1);
+            // kurze kabel: kein durchhang -> glatte s-kurve statt gestauchter welle;
+            // erst ab ~180px distanz beginnt das kabel durchzuhängen
+            const sag = Math.min(Math.max(0, dist - 180) * 0.42, 320);
+            const hoff = Math.min(Math.abs(dx) * 0.42 + 26, 175);
+            d = `M${x1} ${y1} C${x1 + hoff * dir} ${y1 + sag}, ${x2 - hoff * dir} ${y2 + sag}, ${x2} ${y2}`;
+          }
+          html +=
+            `<path d="${d}" fill="none" stroke="rgba(0,0,0,0.45)" stroke-width="5"/>` +
+            `<path d="${d}" fill="none" stroke="${color}" stroke-width="3"/>` +
+            `<circle cx="${x1}" cy="${y1}" r="5" fill="${color}" stroke="rgba(0,0,0,0.45)"/>` +
+            `<circle cx="${x2}" cy="${y2}" r="5" fill="${color}" stroke="rgba(0,0,0,0.45)"/>`;
+        }
+        cablesEl.setAttribute('viewBox', `0 0 ${canvas.offsetWidth} ${canvas.offsetHeight}`);
+        cablesEl.innerHTML = html;
+      }
+
+      // ---------- viewer ----------
+      let selection = DATA.featured, srcLabel = 'selected-works', page = 0, slots = 1;
+      function renderViewer() {
+        const el = $('vslots');
+        el.dataset.slots = slots;
+        const pages = Math.max(1, Math.ceil(selection.length / slots));
+        page = Math.min(page, pages - 1);
+        const chunk = selection.slice(page * slots, page * slots + slots);
+        el.innerHTML = chunk
+          .map(
+            (w, i) => `<figure>
+              <img src="${slots === 1 ? w.image : w.thumb}" alt="${w.title}" loading="lazy" data-idx="${page * slots + i}" />
+              <figcaption>${w.title} <span class="dim">— ${w.year}${w.note ? ' · ' + w.note : ''}</span></figcaption>
+            </figure>`
+          )
+          .join('');
+        $('vpage').textContent = `${page + 1}/${pages}`;
+        $('vsrc').textContent = `source: ${srcLabel} · ${selection.length} works`;
+        $('slotcount').textContent = slots;
+        document.querySelectorAll('.loadbtn').forEach((b) =>
+          b.classList.toggle('on', b.dataset.load === srcLabel || (srcLabel === 'selected-works' && b.dataset.load === 'featured'))
+        );
+        drawCables();
+      }
+      $('slots').addEventListener('input', (e) => {
+        slots = Number(e.target.value);
+        renderViewer();
+      });
+      $('vprev').onclick = () => { page = Math.max(0, page - 1); renderViewer(); };
+      $('vnext').onclick = () => { page++; renderViewer(); };
+      $('vrnd').onclick = () => {
+        const pages = Math.max(1, Math.ceil(selection.length / slots));
+        if (pages > 1) {
+          // nie zweimal hintereinander dasselbe
+          let np;
+          do { np = Math.floor(Math.random() * pages); } while (np === page);
+          page = np;
+        }
+        renderViewer();
+      };
+      // animationen: einzeln in den viewer laden
+      document.querySelectorAll('.animrow').forEach((b) =>
+        b.addEventListener('click', () => {
+          const a = DATA.animations.find((x) => x.slug === b.dataset.anim);
+          if (!a) return;
+          selection = [a];
+          srcLabel = `animation: ${a.title}`;
+          page = 0;
+          renderViewer();
+        })
+      );
+      document.querySelectorAll('.loadbtn').forEach((b) =>
+        b.addEventListener('click', () => {
+          const k = b.dataset.load;
+          if (k === 'featured') { selection = DATA.featured; srcLabel = 'selected-works'; }
+          else if (k === 'all') { selection = DATA.all; srcLabel = 'all'; }
+          else { selection = DATA.byYear[k] || []; srcLabel = k; }
+          page = 0;
+          renderViewer();
+        })
+      );
+
+      // ---------- lightbox ----------
+      const lb = $('lb'), lbimg = lb.querySelector('img');
+      let lbIdx = 0;
+      const showLb = (i) => {
+        lbIdx = (i + selection.length) % selection.length;
+        const w = selection[lbIdx];
+        lbimg.src = w.image;
+        lbimg.alt = w.title;
+        $('lbtitle').textContent = `${w.title} — ${w.year}${w.note ? ' · ' + w.note : ''}`;
+        // permalink: url zeigt aufs aktuelle werk, kann direkt geteilt werden
+        history.replaceState(null, '', '#' + w.slug);
+        if (!lb.open) lb.showModal();
+      };
+      lb.addEventListener('close', () => history.replaceState(null, '', location.pathname + location.search));
+      $('vslots').addEventListener('click', (e) => {
+        if (e.target.dataset.idx !== undefined) showLb(Number(e.target.dataset.idx));
+      });
+      lb.querySelectorAll('[data-nav]').forEach((b) => (b.onclick = () => showLb(lbIdx + Number(b.dataset.nav))));
+      $('lbrnd').onclick = () => {
+        if (selection.length < 2) return;
+        let ni;
+        do { ni = Math.floor(Math.random() * selection.length); } while (ni === lbIdx);
+        showLb(ni);
+      };
+      $('lbclose').onclick = () => lb.close();
+      lb.addEventListener('click', (e) => { if (e.target === lb) lb.close(); });
+      lb.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') showLb(lbIdx - 1);
+        if (e.key === 'ArrowRight') showLb(lbIdx + 1);
+      });
+
+      // ---------- generate.exe: der einzige generator, der nur findet ----------
+      const GEN_FRAMES = ['░', '▒', '▓', '█'];
+      let genBusy = false;
+      $('genbtn').addEventListener('click', () => {
+        if (genBusy) return;
+        genBusy = true;
+        const btn = $('genbtn'), log = $('genlog');
+        btn.disabled = true;
+        btn.classList.add('flash');
+        setTimeout(() => btn.classList.remove('flash'), 140);
+        const steps = [
+          'loading checkpoint..............',
+          'encoding prompt.................',
+          'sampling latents................',
+          'denoising (step %/12)...........',
+          'decoding to pixel space.........',
+        ];
+        let t = 0;
+        const total = 12;
+        const iv = setInterval(() => {
+          t++;
+          const pct = Math.min(100, Math.round((t / total) * 100));
+          const barLen = 18;
+          const fill = Math.round((pct / 100) * barLen);
+          const bar = '█'.repeat(fill) + '░'.repeat(barLen - fill);
+          const step = steps[Math.min(steps.length - 1, Math.floor((t / total) * steps.length))].replace('%', String(t));
+          log.textContent = `${step}\n[${bar}] ${pct}% ${GEN_FRAMES[t % GEN_FRAMES.length]}`;
+          if (t >= total) {
+            clearInterval(iv);
+            // ergebnis landet nur im viewer
+            const w = DATA.all[Math.floor(Math.random() * DATA.all.length)];
+            log.textContent = `done. seed: ${Math.floor(Math.random() * 4294967296)} → viewer\n(honestly: this was made in ${w.year}. the machine only remembers.)`;
+            selection = DATA.all;
+            srcLabel = 'all';
+            const idx = DATA.all.indexOf(w);
+            page = Math.floor(idx / slots);
+            renderViewer();
+            btn.disabled = false;
+            genBusy = false;
+          }
+        }, 45);
+      });
+
+      // ---------- archive activity: besucher der letzten 14 tage ----------
+      // live-daten via goatcounter (cookielos), wenn in site.js ein code
+      // konfiguriert ist — sonst klar gelabelter demo-modus.
+      (async () => {
+        const box = $('win-activity');
+        if (!box) return;
+        const gc = box.dataset.gc;
+        const DAYS = 14;
+        const dayKeys = [];
+        for (let i = DAYS - 1; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(d.getDate() - i);
+          dayKeys.push(d.toISOString().slice(0, 10));
+        }
+        let counts = null, live = false;
+        if (gc) {
+          try {
+            counts = await Promise.all(
+              dayKeys.map((day) =>
+                fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}&end=${day}`)
+                  .then((r) => (r.ok ? r.json() : null))
+                  .then((j) => (j ? Number(String(j.count).replace(/\D/g, '')) || 0 : 0))
+              )
+            );
+            live = true;
+          } catch { counts = null; }
+        }
+        if (!counts) {
+          // demo-signal: deterministisch pro tag, damit es stabil aussieht
+          counts = dayKeys.map((day) => {
+            let h = 0;
+            for (const c of day) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+            return 3 + (h % 34);
+          });
+        }
+        // led-equalizer-optik: gestapelte segmente statt durchgehender balken
+        const max = Math.max(...counts, 1);
+        const bw = 16, gap = 4, H = 56, SEG = 5, SGAP = 2, MAXSEG = 8;
+        let bars = `<line x1="0" y1="${H - 1}" x2="280" y2="${H - 1}" stroke="var(--border)" stroke-width="2"/>`;
+        counts.forEach((c, i) => {
+          const nseg = Math.max(1, Math.round((c / max) * MAXSEG));
+          const today = i === counts.length - 1;
+          for (let s = 0; s < nseg; s++) {
+            const y = H - 3 - (s + 1) * SEG - s * SGAP;
+            const top = s === nseg - 1;
+            bars += `<rect x="${i * (bw + gap) + 1}" y="${y}" width="${bw}" height="${SEG}"
+              fill="${today ? '#c81111' : top ? '#e8a01c' : '#ffe94d'}"/>`;
+          }
+        });
+        $('actgraph').innerHTML = bars;
+        const week = counts.slice(-7).reduce((a, b) => a + b, 0);
+        $('actline').textContent = `${week} visitors / last 7 days`;
+        $('actsub').textContent = live
+          ? `today: ${counts[counts.length - 1]} · via goatcounter, cookie-free`
+          : 'demo signal — set GOATCOUNTER in site.js for live data';
+        if (live) {
+          // heutigen balken alle 60s aktualisieren
+          setInterval(async () => {
+            try {
+              const day = dayKeys[dayKeys.length - 1];
+              const r = await fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}&end=${day}`);
+              const j = await r.json();
+              const c = Number(String(j.count).replace(/\D/g, '')) || 0;
+              $('actsub').textContent = `today: ${c} · via goatcounter, cookie-free`;
+            } catch {}
+          }, 60000);
+        }
+      })();
+
+      // ---------- charakter-fenster (aus dem creator, localStorage) ----------
+      (() => {
+        const c = JSON.parse(localStorage.getItem('mpwCharacter') || 'null');
+        if (!c) return;
+        const box = $('charwin');
+        $('charimg').src = box.dataset.spritebase + c.sprite + '.webp';
+        $('charname').textContent = c.name;
+        $('charclass').textContent = c.klass;
+        $('charno').textContent = `character #${c.sprite} / 266`;
+        box.classList.remove('hidden');
+        box.addEventListener('click', () => (location.href = box.dataset.href));
+      })();
+
+      // ---------- hilfe ----------
+      $('helpbtn').onclick = () => {
+        $('helpwin').classList.toggle('hidden');
+        $('helpbtn').classList.toggle('on');
+      };
+
+      // ---------- farben: canvas / fenster / kabel einzeln ----------
+      function applyPrefs() {
+        const root = document.documentElement.style;
+        prefs.bg ? root.setProperty('--bg', prefs.bg) : root.removeProperty('--bg');
+        const cableCss = CABLE_SETS[prefs.cable] ? CABLE_SETS[prefs.cable][0] : prefs.cable;
+        cableCss ? root.setProperty('--cable', cableCss) : root.removeProperty('--cable');
+        if (prefs.win) {
+          root.setProperty('--win', prefs.win);
+          document.body.classList.add('uniwin');
+        } else {
+          root.removeProperty('--win');
+          document.body.classList.remove('uniwin');
+        }
+        for (const [rowId, key] of [['bgswatches', 'bg'], ['winswatches', 'win'], ['cableswatches', 'cable']]) {
+          $(rowId).querySelectorAll('.swatch').forEach((s) => s.classList.toggle('on', (prefs[key] || '') === s.dataset.v));
+        }
+        savePrefs();
+        drawCables();
+      }
+      for (const [rowId, key] of [['bgswatches', 'bg'], ['winswatches', 'win'], ['cableswatches', 'cable']]) {
+        $(rowId).addEventListener('click', (e) => {
+          const s = e.target.closest('.swatch');
+          if (!s) return;
+          prefs[key] = s.dataset.v;
+          applyPrefs();
+        });
+      }
+      $('swreset').onclick = () => {
+        delete prefs.bg; delete prefs.win; delete prefs.cable;
+        applyPrefs();
+      };
+
+      // ---------- start ----------
+      applyPrefs();
+      applyOpen();
+      renderViewer();
+      if (isWide()) fit();
+      window.addEventListener('resize', drawCables);
+
+      // permalink: /#werk-slug lädt das jahr des werks und öffnet es im fullscreen
+      const hashSlug = decodeURIComponent(location.hash.slice(1));
+      if (hashSlug) {
+        const w = DATA.all.find((x) => x.slug === hashSlug);
+        if (w) {
+          selection = DATA.byYear[w.year] || DATA.all;
+          srcLabel = String(w.year);
+          const idx = selection.findIndex((x) => x.slug === w.slug);
+          page = Math.max(0, Math.floor(idx / slots));
+          renderViewer();
+          showLb(idx);
+        }
+      }
+    </script>
+  </body>
+</html>

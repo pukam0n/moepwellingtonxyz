@@ -1,0 +1,37 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Lightbox from '../../../components/Lightbox.astro';
+import WorkFigure from '../../../components/WorkFigure.astro';
+import { SITE, years, worksByYear, url } from '../../../data/site.js';
+
+export function getStaticPaths() {
+  return years.map((y) => ({ params: { year: String(y) } }));
+}
+
+const { year } = Astro.params;
+const y = Number(year);
+const works = worksByYear(y);
+const idx = years.indexOf(y);
+const prev = years[idx - 1];
+const next = years[idx + 1];
+const base = url(`/${SITE.seriesSlug}`);
+---
+
+<Base
+  title={`${year} — ${SITE.series}`}
+  breadcrumb={`~/<a href="${base}/${years[0]}/">art-in-the-age...</a>/${year}`}
+>
+  <h1>{year}/</h1>
+  <p class="dim">{works.length} {works.length === 1 ? 'work' : 'works'} · {SITE.series}</p>
+
+  <div class="grid" style="margin-top:2.5rem">
+    {works.map((w, i) => <WorkFigure work={w} loading={i < 3 ? 'eager' : 'lazy'} />)}
+  </div>
+
+  <div class="pager">
+    <span>{prev && <a href={`${base}/${prev}/`}>&larr; {prev}/</a>}</span>
+    <span>{next && <a href={`${base}/${next}/`}>{next}/ &rarr;</a>}</span>
+  </div>
+
+  <Lightbox />
+</Base>

@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import WorkFigure from '../../components/WorkFigure.astro';
+import { featuredWorks } from '../../data/site.js';
+---
+
+<Base title="selected works" breadcrumb="~/selected-works">
+  <h1>selected works</h1>
+  <p class="dim">a curated scroll across all years. click any piece for full view.</p>
+
+  <div class="feed" style="margin-top:2.5rem">
+    {featuredWorks.map((w, i) => <WorkFigure work={w} size="full" loading={i === 0 ? 'eager' : 'lazy'} />)}
+  </div>
+
+  <Lightbox />
+
+  <script is:inline>
+    // sanftes fade-in beim scrollen — nichts weiter
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            e.target.classList.add('seen');
+            io.unobserve(e.target);
+          }
+        }),
+      { rootMargin: '0px 0px -10% 0px' }
+    );
+    document.querySelectorAll('.feed figure').forEach((f) => io.observe(f));
+  </script>
+</Base>

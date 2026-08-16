@@ -1,0 +1,73 @@
+---
+import Base from '../../layouts/Base.astro';
+import { url } from '../../data/site.js';
+---
+
+<Base title="datenschutz" breadcrumb={`~/<a href="${url('/info/')}">info</a>/datenschutz`}>
+  <h1>datenschutzerklärung</h1>
+  <div class="prose" lang="de">
+    <p class="dim">stand: august 2026</p>
+
+    <h2>verantwortlicher</h2>
+    <p>
+      verantwortlich für die datenverarbeitung auf dieser website ist die im
+      <a href={url('/info/impressum/')}>impressum</a> genannte person. anfragen zum
+      datenschutz bitte an die dort angegebene e-mail-adresse.
+    </p>
+
+    <h2>hosting / server-logfiles</h2>
+    <p>
+      diese website wird als statische seite über github pages gehostet
+      (github inc., 88 colin p. kelly jr. street, san francisco, ca 94107,
+      usa). beim aufruf der seite verarbeitet github technisch notwendige
+      daten (ip-adresse, datum/uhrzeit, aufgerufene datei, user-agent) in
+      server-logfiles, um die seite auszuliefern und die sicherheit des
+      dienstes zu gewährleisten. rechtsgrundlage ist art. 6 abs. 1 lit. f
+      DSGVO (berechtigtes interesse an einem sicheren und stabilen betrieb).
+      details in der
+      <a href="https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement">datenschutzerklärung von github</a>.
+      die übermittlung in die usa stützt sich auf das
+      eu-us data privacy framework, dem github angehört.
+    </p>
+
+    <h2>keine cookies, kein tracking</h2>
+    <p>
+      diese website setzt keine cookies, verwendet keine analyse- oder
+      tracking-dienste und lädt keine inhalte von drittservern nach. schriften
+      werden lokal vom eigenen server ausgeliefert (kein google fonts cdn). es
+      gibt kein kontaktformular.
+    </p>
+
+    <h2>besucherstatistik (goatcounter)</h2>
+    <p>
+      [NUR FALLS AKTIVIERT, SONST ABSATZ LÖSCHEN:] diese website nutzt den
+      statistikdienst goatcounter (goatcounter.com), um anonym die anzahl der
+      besuche zu zählen. dabei werden keine cookies gesetzt und keine
+      personenbezogenen profile gebildet; die ip-adresse wird nicht
+      gespeichert. rechtsgrundlage ist art. 6 abs. 1 lit. f DSGVO
+      (berechtigtes interesse an reichweitenmessung ohne tracking).
+    </p>
+
+    <h2>links zu social media</h2>
+    <p>
+      verlinkungen zu social-media-profilen sind reine hyperlinks — es sind
+      keine plugins, widgets oder tracking-skripte der plattformen eingebunden.
+      erst beim anklicken verlassen sie diese website; es gelten dann die
+      datenschutzbestimmungen der jeweiligen plattform.
+    </p>
+
+    <h2>ihre rechte</h2>
+    <p>
+      sie haben nach der DSGVO das recht auf auskunft (art. 15), berichtigung
+      (art. 16), löschung (art. 17), einschränkung der verarbeitung (art. 18),
+      datenübertragbarkeit (art. 20) sowie widerspruch gegen die verarbeitung
+      (art. 21). außerdem besteht ein beschwerderecht bei einer
+      datenschutz-aufsichtsbehörde (art. 77 DSGVO).
+    </p>
+
+    <p class="dim">
+      hinweis: diese erklärung wurde sorgfältig erstellt, ersetzt aber keine
+      rechtsberatung.
+    </p>
+  </div>
+</Base>

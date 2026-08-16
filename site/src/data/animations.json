@@ -1,0 +1,31 @@
+[
+  {
+    "slug": "kurayami",
+    "title": "kurayami",
+    "year": 2022,
+    "note": "",
+    "source": "Kurayami, 2022.gif"
+  },
+  {
+    "slug": "the-way-home",
+    "title": "the way home",
+    "year": 2023,
+    "note": "",
+    "source": "bilder/the way home, 2023.gif"
+  },
+  {
+    "slug": "proxy",
+    "title": "proxy",
+    "year": 2026,
+    "note": "",
+    "source": "bilder/proxy 2026.gif"
+  },
+  {
+    "slug": "reality",
+    "title": "reality",
+    "year": 2026,
+    "note": "",
+    "source": "bilder/reality.gif",
+    "hidden": true
+  }
+]

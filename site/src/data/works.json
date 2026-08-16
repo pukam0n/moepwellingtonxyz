@@ -1,0 +1,474 @@
+[
+  {
+    "slug": "untitled-05",
+    "title": "untitled 05",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "5.jpg"
+  },
+  {
+    "slug": "untitled-15",
+    "title": "untitled 15",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "15.jpg"
+  },
+  {
+    "slug": "untitled-28",
+    "title": "untitled 28",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (6).png"
+  },
+  {
+    "slug": "untitled-31",
+    "title": "untitled 31",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (9).png"
+  },
+  {
+    "slug": "untitled-02",
+    "title": "untitled 02",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "2.jpg"
+  },
+  {
+    "slug": "untitled-19",
+    "title": "untitled 19",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/2026 (3).jpg"
+  },
+  {
+    "slug": "untitled-03",
+    "title": "untitled 03",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "3.jpg"
+  },
+  {
+    "slug": "untitled-09",
+    "title": "untitled 09",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "9.jpg"
+  },
+  {
+    "slug": "untitled-21",
+    "title": "untitled 21",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/2026 (5).jpg"
+  },
+  {
+    "slug": "untitled-01",
+    "title": "untitled 01",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "1.jpg"
+  },
+  {
+    "slug": "untitled-25",
+    "title": "untitled 25",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (3).png"
+  },
+  {
+    "slug": "untitled-35",
+    "title": "untitled 35",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (13).png"
+  },
+  {
+    "slug": "farming",
+    "title": "farming",
+    "year": 2026,
+    "note": "",
+    "featured": true,
+    "source": "bilder/farming, 2026.jpg"
+  },
+  {
+    "slug": "untitled-13",
+    "title": "untitled 13",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "13.jpg"
+  },
+  {
+    "slug": "untitled-07",
+    "title": "untitled 07",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "7.jpg"
+  },
+  {
+    "slug": "untitled-33",
+    "title": "untitled 33",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (11).png"
+  },
+  {
+    "slug": "untitled-16",
+    "title": "untitled 16",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "16.png"
+  },
+  {
+    "slug": "cooking",
+    "title": "cooking",
+    "year": 2026,
+    "note": "",
+    "featured": true,
+    "source": "bilder/cooking, 2026.jpg"
+  },
+  {
+    "slug": "untitled-17",
+    "title": "untitled 17",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/2026.jpg"
+  },
+  {
+    "slug": "untitled-12",
+    "title": "untitled 12",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "12.jpg"
+  },
+  {
+    "slug": "untitled-04",
+    "title": "untitled 04",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "4.jpg"
+  },
+  {
+    "slug": "untitled-27",
+    "title": "untitled 27",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (5).png"
+  },
+  {
+    "slug": "untitled-18",
+    "title": "untitled 18",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/2026 (2).jpg"
+  },
+  {
+    "slug": "untitled-10",
+    "title": "untitled 10",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "10.jpg"
+  },
+  {
+    "slug": "untitled-26",
+    "title": "untitled 26",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (4).png"
+  },
+  {
+    "slug": "untitled-30",
+    "title": "untitled 30",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (8).png"
+  },
+  {
+    "slug": "new-game",
+    "title": "new game+",
+    "year": 2026,
+    "note": "",
+    "featured": true,
+    "source": "bilder/new game+.jpg"
+  },
+  {
+    "slug": "untitled-20",
+    "title": "untitled 20",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/2026 (4).jpg"
+  },
+  {
+    "slug": "untitled-23",
+    "title": "untitled 23",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (1).png"
+  },
+  {
+    "slug": "untitled-22",
+    "title": "untitled 22",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/HPoCxmtW4AA2Y46.jpg"
+  },
+  {
+    "slug": "untitled-11",
+    "title": "untitled 11",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": true,
+    "source": "11.jpg"
+  },
+  {
+    "slug": "untitled-34",
+    "title": "untitled 34",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (12).png"
+  },
+  {
+    "slug": "untitled-14",
+    "title": "untitled 14",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "14.jpg"
+  },
+  {
+    "slug": "untitled-32",
+    "title": "untitled 32",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (10).png"
+  },
+  {
+    "slug": "untitled-29",
+    "title": "untitled 29",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (7).png"
+  },
+  {
+    "slug": "untitled-06",
+    "title": "untitled 06",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "6.jpg"
+  },
+  {
+    "slug": "untitled-08",
+    "title": "untitled 08",
+    "year": 2026,
+    "note": "ui studies",
+    "featured": false,
+    "source": "8.jpg"
+  },
+  {
+    "slug": "untitled-24",
+    "title": "untitled 24",
+    "year": 2026,
+    "note": "",
+    "featured": false,
+    "source": "bilder/bilder 2026/2026 (2).png"
+  },
+  {
+    "slug": "favor-01-contentment",
+    "title": "contentment",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": true,
+    "source": "bilder/the favor of taking a seat, 2022/1 contentment 2022.png"
+  },
+  {
+    "slug": "favor-02-doubt",
+    "title": "doubt",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/2 doubt.png"
+  },
+  {
+    "slug": "favor-03-expectation",
+    "title": "expectation",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/3 expectation.png"
+  },
+  {
+    "slug": "favor-04-passion",
+    "title": "passion",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": true,
+    "source": "bilder/the favor of taking a seat, 2022/4 passion.png"
+  },
+  {
+    "slug": "favor-05-broken",
+    "title": "broken",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/5 broken.png"
+  },
+  {
+    "slug": "favor-06-attachment",
+    "title": "attachment",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/6 attachment.png"
+  },
+  {
+    "slug": "favor-07-enjoyment",
+    "title": "enjoyment",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/7 enjoyment.png"
+  },
+  {
+    "slug": "favor-08-sorrow",
+    "title": "sorrow",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/8 sorrow.png"
+  },
+  {
+    "slug": "favor-09-freezing",
+    "title": "freezing",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/9 freezing.png"
+  },
+  {
+    "slug": "favor-10-creativity",
+    "title": "creativity",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/10 creativity.png"
+  },
+  {
+    "slug": "favor-11-immersed",
+    "title": "immersed",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": true,
+    "source": "bilder/the favor of taking a seat, 2022/11 immersed.png"
+  },
+  {
+    "slug": "favor-12-proudly",
+    "title": "proudly",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/12 proudly.png"
+  },
+  {
+    "slug": "favor-14-inspiration",
+    "title": "inspiration",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/14 inspiration.png"
+  },
+  {
+    "slug": "favor-15-boredom",
+    "title": "boredom",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/15 boredom.png"
+  },
+  {
+    "slug": "favor-16-expectant",
+    "title": "expectant",
+    "year": 2022,
+    "note": "the favor of taking a seat",
+    "featured": false,
+    "source": "bilder/the favor of taking a seat, 2022/16 expectant.png"
+  },
+  {
+    "slug": "ballet-contes-de-fees",
+    "title": "contes de fées",
+    "year": 2024,
+    "note": "ballet studies",
+    "featured": false,
+    "source": "bilder/ballet studies, 2024/contes de fées 2024.png"
+  },
+  {
+    "slug": "ballet-la-nuit",
+    "title": "la nuit",
+    "year": 2024,
+    "note": "ballet studies",
+    "featured": true,
+    "source": "bilder/ballet studies, 2024/la nuit.png"
+  },
+  {
+    "slug": "ballet-le-jour",
+    "title": "le jour",
+    "year": 2024,
+    "note": "ballet studies",
+    "featured": true,
+    "source": "bilder/ballet studies, 2024/le jour.png"
+  },
+  {
+    "slug": "ballet-le-tumulte",
+    "title": "le tumulte",
+    "year": 2024,
+    "note": "ballet studies",
+    "featured": false,
+    "source": "bilder/ballet studies, 2024/le tumulte 2025.png"
+  },
+  {
+    "slug": "ballet-new-orleans",
+    "title": "new orleans",
+    "year": 2024,
+    "note": "ballet studies",
+    "featured": false,
+    "source": "bilder/ballet studies, 2024/new orleans 2024.png"
+  },
+  {
+    "slug": "ballet-une-danse-avec-l-agorithme",
+    "title": "une danse avec l'agorithme",
+    "year": 2024,
+    "note": "ballet studies",
+    "featured": false,
+    "source": "bilder/ballet studies, 2024/une danse avec l'agorithme.png"
+  }
+]

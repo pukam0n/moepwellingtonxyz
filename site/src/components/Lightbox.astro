@@ -1,0 +1,57 @@
+---
+// vollbild-ansicht mit ←/→ und esc, wie ein alter dateibrowser.
+// erwartet auf der seite <a class="work" data-title data-meta href=bild>-elemente.
+---
+
+<dialog class="lightbox">
+  <div class="frame">
+    <img alt="" />
+    <div class="bar">
+      <button type="button" data-nav="-1">&larr; prev</button>
+      <span class="lb-title"></span>
+      <span class="lb-meta hint"></span>
+      <button type="button" data-nav="1">next &rarr;</button>
+      <button type="button" data-close>esc close</button>
+    </div>
+  </div>
+</dialog>
+
+<script is:inline>
+  (() => {
+    const dlg = document.querySelector('dialog.lightbox');
+    if (!dlg) return;
+    const img = dlg.querySelector('img');
+    const title = dlg.querySelector('.lb-title');
+    const meta = dlg.querySelector('.lb-meta');
+    const items = [...document.querySelectorAll('a.work')];
+    let idx = -1;
+
+    const show = (i) => {
+      idx = (i + items.length) % items.length;
+      const a = items[idx];
+      img.src = a.href;
+      img.alt = a.dataset.title || '';
+      title.textContent = a.dataset.title || '';
+      meta.textContent = a.dataset.meta || '';
+      if (!dlg.open) dlg.showModal();
+    };
+
+    items.forEach((a, i) =>
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        show(i);
+      })
+    );
+    dlg.querySelectorAll('[data-nav]').forEach((b) =>
+      b.addEventListener('click', () => show(idx + Number(b.dataset.nav)))
+    );
+    dlg.querySelector('[data-close]').addEventListener('click', () => dlg.close());
+    dlg.addEventListener('click', (e) => {
+      if (e.target === dlg) dlg.close();
+    });
+    dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft') show(idx - 1);
+      if (e.key === 'ArrowRight') show(idx + 1);
+    });
+  })();
+</script>

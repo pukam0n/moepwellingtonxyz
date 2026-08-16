@@ -1,0 +1,18 @@
+{
+  "name": "moe-p-wellington",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "import-pics": "node scripts/import-pics.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.2.2"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.3"
+  }
+}

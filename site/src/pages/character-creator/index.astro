@@ -1,0 +1,262 @@
+---
+// character creator: eigenständige seite im canvas-look mit subtilem
+// morrowind-einschlag. 266 sprites, endlose rerolls, platzhalter-attribute,
+// klasse wird aus dem dominanten attribut "gewürfelt". speichert in localStorage.
+import { SITE, url } from '../../data/site.js';
+import sprites from '../../data/sprites.json';
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={`character creator — ${SITE.name}`} />
+    <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
+    <title>character creator — {SITE.name}</title>
+  </head>
+  <body data-sprites={JSON.stringify(sprites.ids)} data-spritebase={url('/sprites/')}>
+    <div id="topbar">
+      <span class="tb-title">character creator</span>
+      <span class="sp"></span>
+      <a href={url('/')}>← back to the archive</a>
+    </div>
+
+    <main>
+      <div class="win" id="creator">
+        <div class="win-title"><span class="sq r"></span><span class="sq b"></span> ▓▒ new-character.cfg ░▓</div>
+        <p class="dim opener">go on. take your time. the archive keeps no schedule.</p>
+
+        <div class="row">
+          <label class="lbl" for="cname">name</label>
+          <input id="cname" type="text" maxlength="24" spellcheck="false" placeholder="who is operating this interface?" />
+        </div>
+
+        <div class="row sprite-row">
+          <span class="lbl">sign</span>
+          <div class="spritebox">
+            <img id="sprite" alt="your sprite" width="256" height="256" />
+            <div class="dim small" id="spriteno">sprite #— / {sprites.count}</div>
+          </div>
+          <button id="reroll" class="tinybtn">reroll ⚂</button>
+        </div>
+
+        <div class="row">
+          <span class="lbl">attributes</span>
+          <div class="stats">
+            <div class="dim small" id="pool">10 points unassigned</div>
+            <div id="statrows"></div>
+          </div>
+        </div>
+
+        <div class="row">
+          <span class="lbl">class</span>
+          <div class="classbox">
+            <div id="cclass">—</div>
+            <div class="dim small" id="cdesc">the stars have not decided.</div>
+          </div>
+        </div>
+
+        <button id="create">CREATE CHARACTER</button>
+        <p class="dim small" id="saved" hidden>
+          saved. <a href={url('/')}>return to the archive →</a>
+        </p>
+      </div>
+    </main>
+
+    <style is:global>
+      @font-face {
+        font-family: 'VT323';
+        src: url('../../fonts/VT323-Regular.ttf') format('truetype');
+        font-display: swap;
+      }
+      :root {
+        --bg: #1e56b0; --win: #e9e4cf; --border: #101010;
+        --shadow: #071c4a; --text: #262104; --yb: #ffe94d;
+        --tb: #c9c9c9; --tb-hi: #efefef; --tb-lo: #7d7d7d;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; border-radius: 0 !important; }
+      html, body {
+        font-family: 'VT323', ui-monospace, monospace; font-size: 18px;
+        line-height: 1.35; color: var(--text); background: var(--bg);
+        background-image: radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px);
+        background-size: 7px 7px; image-rendering: pixelated; min-height: 100dvh;
+      }
+      a { color: inherit; }
+      button { font: inherit; cursor: pointer; user-select: none; }
+      .dim { opacity: 0.65; }
+      .small { font-size: 15px; }
+      .sp { flex: 1; }
+
+      #topbar {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 100; height: 46px;
+        background: var(--tb); color: #1a1a1a; border-bottom: 2px solid var(--border);
+        box-shadow: inset 0 2px 0 var(--tb-hi), inset 0 -2px 0 var(--tb-lo);
+        padding: 0 16px; display: flex; gap: 14px; align-items: center;
+      }
+      #topbar .tb-title { font-size: 24px; letter-spacing: 2px; }
+      #topbar a {
+        color: #1a1a1a; text-decoration: none; font-size: 16px;
+        background: var(--tb); border: 2px solid;
+        border-color: var(--tb-hi) var(--tb-lo) var(--tb-lo) var(--tb-hi);
+        padding: 0 8px; line-height: 22px;
+      }
+      #topbar a:hover { background: var(--tb-hi); }
+
+      main { display: flex; justify-content: center; padding: 80px 16px 40px; }
+      .win {
+        width: min(560px, 100%); background-color: var(--win);
+        border: 2px solid var(--border);
+        box-shadow: 4px 4px 0 var(--shadow), inset 0 0 0 2px rgba(255, 255, 255, 0.4);
+        background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.055) 0% 25%, transparent 0% 50%);
+        background-size: 6px 6px; padding: 10px 16px 16px;
+      }
+      .win-title {
+        color: var(--border); background: rgba(0, 0, 0, 0.1);
+        padding: 1px 6px; margin: -4px -10px 10px; white-space: nowrap; overflow: hidden;
+      }
+      .sq { display: inline-block; width: 8px; height: 8px; margin: 0 2px; vertical-align: middle; border: 1px solid var(--border); }
+      .sq.r { background: #c81111; } .sq.b { background: #1233c8; }
+      .opener { margin-bottom: 14px; font-style: italic; }
+
+      .row { display: flex; gap: 14px; align-items: flex-start; padding: 10px 0; border-top: 2px dashed rgba(0, 0, 0, 0.2); }
+      .lbl { width: 90px; flex-shrink: 0; opacity: 0.75; padding-top: 2px; }
+      #cname {
+        flex: 1; background: transparent; border: none;
+        border-bottom: 2px solid rgba(0, 0, 0, 0.4); font: inherit; color: var(--text);
+        outline: none; padding: 1px 0; caret-color: #c81111;
+      }
+
+      .sprite-row { align-items: center; }
+      .spritebox { flex: 1; }
+      #sprite {
+        display: block; width: 190px; height: 190px;
+        border: 2px solid var(--border); background: #efe9d8;
+        box-shadow: 3px 3px 0 var(--shadow); image-rendering: pixelated;
+      }
+      #sprite.flash { animation: spriteflash 0.3s ease-out; }
+      @keyframes spriteflash { 0% { filter: brightness(1.8) contrast(0.6); } 100% { filter: brightness(1); } }
+      .tinybtn {
+        padding: 2px 10px; background: #efe9d8; border: 2px solid var(--border);
+        color: #1a1503; box-shadow: 2px 2px 0 var(--shadow); font-size: 16px;
+      }
+      .tinybtn:active { transform: translate(2px, 2px); box-shadow: none; }
+
+      .stats { flex: 1; }
+      .statrow { display: flex; align-items: center; gap: 8px; padding: 2px 0; }
+      .statrow .sname { width: 90px; font-size: 16px; }
+      .statrow .bar { flex: 1; letter-spacing: 2px; font-size: 16px; }
+      .statrow button {
+        width: 24px; background: #efe9d8; border: 2px solid var(--border);
+        box-shadow: 2px 2px 0 var(--shadow); font-size: 15px; line-height: 1.1;
+      }
+      .statrow button:active { transform: translate(1px, 1px); box-shadow: none; }
+      .statrow button:disabled { opacity: 0.35; cursor: default; }
+      #pool { margin-bottom: 4px; }
+
+      .classbox { flex: 1; }
+      #cclass { font-size: 22px; letter-spacing: 1px; }
+
+      #create {
+        display: block; width: 100%; margin-top: 14px;
+        font-size: 26px; letter-spacing: 4px; padding: 12px;
+        background: #c81111; color: var(--yb); border: 2px solid var(--border);
+        box-shadow: 4px 4px 0 var(--shadow);
+        transition: transform 0.05s, box-shadow 0.05s;
+      }
+      #create:active { transform: translateY(2px); box-shadow: 2px 2px 0 var(--shadow); }
+      #saved { margin-top: 8px; }
+    </style>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const IDS = JSON.parse(document.body.dataset.sprites);
+      const BASE = document.body.dataset.spritebase;
+
+      // platzhalter-attribute + klassen (kryptisch-akademisch, wird noch kuratiert)
+      const STATS = ['literacy', 'intention', 'memory', 'noise', 'patience'];
+      const CLASSES = {
+        literacy: ['the exegete', 'reads the interface as scripture. finds no author — only commentary.'],
+        intention: ['the operator', 'still believes the button and the deed are the same thing.'],
+        memory: ['the archivist', 'curator of the false memory of software. keeps what the copy forgets.'],
+        noise: ['the static shepherd', 'tends signals that refuse to become information.'],
+        patience: ['the buffering monk', 'has seen 99 percent and chosen to stay.'],
+        balanced: ['the reproduction', 'indistinguishable from an original that never existed.'],
+      };
+      const POOL = 10, MAX = 5;
+
+      const saved = JSON.parse(localStorage.getItem('mpwCharacter') || 'null');
+      let spriteIdx = saved ? IDS.indexOf(saved.sprite) : Math.floor(Math.random() * IDS.length);
+      if (spriteIdx < 0) spriteIdx = 0;
+      const stats = saved?.stats ? { ...saved.stats } : Object.fromEntries(STATS.map((s) => [s, 1]));
+      if (saved?.name) $('cname').value = saved.name;
+
+      const spent = () => STATS.reduce((a, s) => a + stats[s] - 1, 0);
+
+      function classOf() {
+        const max = Math.max(...STATS.map((s) => stats[s]));
+        const tops = STATS.filter((s) => stats[s] === max);
+        return tops.length === 1 ? CLASSES[tops[0]] : CLASSES.balanced;
+      }
+
+      function render() {
+        $('sprite').src = BASE + IDS[spriteIdx] + '.webp';
+        $('spriteno').textContent = `sprite #${IDS[spriteIdx]} / ${IDS.length}`;
+        const free = POOL - spent();
+        $('pool').textContent = free === 0 ? 'all points assigned' : `${free} point${free === 1 ? '' : 's'} unassigned`;
+        $('statrows').innerHTML = STATS.map((s) => `
+          <div class="statrow">
+            <span class="sname">${s}</span>
+            <button data-s="${s}" data-d="-1" ${stats[s] <= 1 ? 'disabled' : ''}>−</button>
+            <span class="bar">${'▮'.repeat(stats[s])}${'▯'.repeat(MAX - stats[s])}</span>
+            <button data-s="${s}" data-d="1" ${stats[s] >= MAX || free <= 0 ? 'disabled' : ''}>+</button>
+          </div>`).join('');
+        const [name, desc] = classOf();
+        $('cclass').textContent = name;
+        $('cdesc').textContent = 'the stars suggest: ' + desc;
+      }
+
+      $('statrows').addEventListener('click', (e) => {
+        const b = e.target.closest('button[data-s]');
+        if (!b || b.disabled) return;
+        stats[b.dataset.s] += Number(b.dataset.d);
+        render();
+      });
+
+      // reroll mit kurzem slot-machine-geflacker — unendlich oft erlaubt
+      let rolling = false;
+      $('reroll').addEventListener('click', () => {
+        if (rolling) return;
+        rolling = true;
+        let t = 0;
+        const iv = setInterval(() => {
+          spriteIdx = Math.floor(Math.random() * IDS.length);
+          $('sprite').src = BASE + IDS[spriteIdx] + '.webp';
+          $('spriteno').textContent = `sprite #${IDS[spriteIdx]} / ${IDS.length}`;
+          if (++t >= 7) {
+            clearInterval(iv);
+            $('sprite').classList.add('flash');
+            setTimeout(() => $('sprite').classList.remove('flash'), 320);
+            rolling = false;
+          }
+        }, 70);
+      });
+
+      $('create').addEventListener('click', () => {
+        const name = $('cname').value.trim() || 'unnamed';
+        const [klass] = classOf();
+        localStorage.setItem('mpwCharacter', JSON.stringify({
+          name,
+          sprite: IDS[spriteIdx],
+          stats,
+          klass,
+          created: saved?.created || new Date().toISOString(),
+        }));
+        $('saved').hidden = false;
+        $('saved').scrollIntoView({ block: 'nearest' });
+      });
+
+      render();
+    </script>
+  </body>
+</html>

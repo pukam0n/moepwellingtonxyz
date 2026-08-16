@@ -1,0 +1,26 @@
+---
+// size "thumb" fürs grid, "full" für den feed — lightbox lädt immer das volle bild
+const { work, loading = 'lazy', size = 'thumb' } = Astro.props;
+const meta = [work.year, work.note].filter(Boolean).join(' · ');
+---
+
+<figure id={work.slug}>
+  <a
+    class="work"
+    href={work.image}
+    data-title={work.title}
+    data-meta={meta}
+  >
+    <img
+      src={size === 'full' ? work.image : work.thumb}
+      alt={work.title}
+      loading={loading}
+      decoding="async"
+      width={size === 'full' ? 1800 : 640}
+      height={size === 'full' ? 1800 : 640}
+    />
+  </a>
+  <figcaption>
+    {work.title} <span class="meta">— {meta}</span>
+  </figcaption>
+</figure>

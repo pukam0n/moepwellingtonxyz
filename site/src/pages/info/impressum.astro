@@ -1,0 +1,29 @@
+---
+import Base from '../../layouts/Base.astro';
+import { url } from '../../data/site.js';
+---
+
+<Base title="impressum" breadcrumb={`~/<a href="${url('/info/')}">info</a>/impressum`}>
+  <h1>impressum</h1>
+  <div class="prose" lang="de">
+    <p class="dim">angaben gemäß § 5 DDG</p>
+
+    <p>
+      Moritz Weidinger,<br />
+      handelnd unter dem künstlernamen moe p. wellington
+    </p>
+    <p>
+      Zum Kamp 2<br />
+      27330 Asendorf<br />
+      Deutschland
+    </p>
+    <p>
+      e-mail: <a href="mailto:moritz.weidinger@proton.me">moritz.weidinger@proton.me</a>
+    </p>
+
+    <hr />
+    <p class="dim">
+      inhaltlich verantwortlich: Moritz Weidinger (anschrift wie oben).
+    </p>
+  </div>
+</Base>
