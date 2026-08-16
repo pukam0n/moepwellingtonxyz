@@ -79,7 +79,7 @@ import sprites from '../../data/sprites.json';
         font-display: swap;
       }
       :root {
-        --bg: #1e56b0; --win: #e9e4cf; --border: #101010;
+        --bg: #1a1a1a; --win: #e9e4cf; --border: #101010;
         --shadow: #071c4a; --text: #262104; --yb: #ffe94d;
         --tb: #c9c9c9; --tb-hi: #efefef; --tb-lo: #7d7d7d;
       }
@@ -187,22 +187,38 @@ import sprites from '../../data/sprites.json';
       const IDS = JSON.parse(document.body.dataset.sprites);
       const BASE = document.body.dataset.spritebase;
 
+      // hintergrund folgt der canvas-farbwahl (settings.cfg), default schwarz
+      const canvasPrefs = JSON.parse(localStorage.getItem('canvasPrefs') || '{}');
+      if (canvasPrefs.bg) document.documentElement.style.setProperty('--bg', canvasPrefs.bg);
+
+      // wechselnde eröffnungszeile
+      const OPENERS = [
+        'go on. take your time. the archive keeps no schedule.',
+        'there are no wrong builds. only documented ones.',
+        'choose carefully. or do not — both are recorded the same way.',
+        'the form is short. the consequences are permanent.',
+        'this will only take a moment. the moment is yours forever.',
+      ];
+      document.querySelector('.opener').textContent =
+        OPENERS[Math.floor(Math.random() * OPENERS.length)];
+
       // attribute: lesen · aufnehmen · herkunft · widerstand · warten
       const STATS = ['literacy', 'bandwidth', 'provenance', 'friction', 'patience'];
-      // klasse = dominantes + zweites attribut -> 20 subklassen.
-      // gleichstände werden über die feste attribut-reihenfolge aufgelöst.
-      // ausnahme: die perfekte verteilung 3/3/3/3/3 ergibt "the reproduction".
+      // klassenfindung in drei stufen:
+      //   1. die perfekte verteilung 3/3/3/3/3 -> the reproduction
+      //   2. signatur-builds (SPECIALS, reihenfolge = priorität)
+      //   3. sonst: dominantes + zweites attribut -> 20 subklassen
       const CLASSES = {
         reproduction: ['the reproduction', 'perfectly distributed. indistinguishable from an original that never existed.'],
         literacy: {
-          bandwidth: ['the footnote maximalist', 'no text ends. every reference opens another door.'],
-          provenance: ['the meme historian', 'traces the image back through a thousand reposts to a joke nobody made.'],
+          bandwidth: ['the footnote maximalist', 'the argument is in footnote 41. the footnotes have footnotes.'],
+          provenance: ['the meme historian', 'cites the repost of the repost. considers the original apocryphal.'],
           friction: ['the institutional critic', 'reads the building, not the plaque.'],
-          patience: ['the slow critic', 'still writing the review. the work has already been deleted.'],
+          patience: ['the slow critic', 'the review is nearly finished. the work has been deleted for years.'],
         },
         bandwidth: {
           literacy: ['the dataset scavenger', 'eats what the crawlers left behind.'],
-          provenance: ['the contamination archivist', 'keeps records of what got in, and how.'],
+          provenance: ['the contamination archivist', 'keeps meticulous records of what got in. politely declines to remove it.'],
           friction: ['the glitch auteur', 'signs the error as if it were a decision.'],
           patience: ['the render hermit', 'left for the render farm years ago. sends frames.'],
         },
@@ -210,21 +226,38 @@ import sprites from '../../data/sprites.json';
           literacy: ['the forensic curator', 'exhibits the evidence. refuses to name a suspect.'],
           bandwidth: ['the rights-holder', 'owns a percentage of everything you have ever seen.'],
           friction: ['the claimant', 'files disputes against the horizon.'],
-          patience: ['the conservator', 'keeps the original at 18 degrees. tells no one where.'],
+          patience: ['the conservator', 'keeps the original at 18 degrees. will not say where. will not say if.'],
         },
         friction: {
           literacy: ['the poor-image theologian', 'finds grace in the artifact of the artifact.'],
           bandwidth: ['the compression ascetic', 'believes what survives compression deserved to.'],
-          provenance: ['the material witness', 'was there when it was still an object.'],
+          provenance: ['the material witness', 'was there when it was still an object. keeps mentioning it.'],
           patience: ['the craft fundamentalist', 'insists it must hurt the hands to count.'],
         },
         patience: {
           literacy: ['the auteurist', 'waits for intent to appear in the credits.'],
           bandwidth: ['the slop auteur', 'generates until quantity confesses to being a style.'],
-          provenance: ['the labor romantic', 'believes the hours are stored in the file.'],
+          provenance: ['the labor romantic', 'believes the hours are stored in the file. somewhere.'],
           friction: ['the director', 'says stop. nothing stops. says stop again.'],
         },
       };
+      // signatur-builds: [prüfung, name, beschreibung] — erste treffende gewinnt
+      const SPECIALS = [
+        [(s) => s.literacy === 5 && s.friction === 5,
+          'the adversarial user', 'reads the terms of service in full, as a weapon.'],
+        [(s) => s.friction === 5 && s.bandwidth === 1,
+          'the refuser', 'has considered the content and would prefer not to.'],
+        [(s) => s.bandwidth === 5 && s.provenance === 1,
+          'the middleman', 'forwards everything. attribution pending since 2014.'],
+        [(s) => s.patience === 5 && s.literacy === 1,
+          'the sleeper', 'has not opened the file. will not open the file. guards the file.'],
+        [(s) => s.provenance === 1 && s.literacy >= 4,
+          'the revisionist', 'remembers it differently. has sources. will not show them.'],
+        [(s) => s.bandwidth >= 4 && s.friction === 1,
+          'the normie', 'scrolls. likes. is, statistically, the audience.'],
+        [(s) => STATS.every((k) => s[k] >= 2 && s[k] <= 4) && STATS.filter((k) => s[k] === 4).length <= 1,
+          'the model citizen', 'flags nothing. breaks nothing. the system has no notes.'],
+      ];
       const POOL = 10, MAX = 5;
 
       const REG = document.body.dataset.registry;
@@ -275,6 +308,9 @@ import sprites from '../../data/sprites.json';
 
       function classOf() {
         if (STATS.every((s) => stats[s] === 3)) return CLASSES.reproduction;
+        for (const [test, name, desc] of SPECIALS) {
+          if (test(stats)) return [name, desc];
+        }
         const order = [...STATS].sort(
           (a, b) => stats[b] - stats[a] || STATS.indexOf(a) - STATS.indexOf(b)
         );
@@ -306,8 +342,15 @@ import sprites from '../../data/sprites.json';
         render();
       });
 
-      // reroll mit kurzem slot-machine-geflacker — unendlich oft erlaubt,
-      // im registry-modus nur über die noch freien sprites
+      // reroll würfelt alles: sprite UND die komplette punkteverteilung.
+      // unendlich oft erlaubt; im registry-modus nur über freie sprites.
+      const randomStats = () => {
+        STATS.forEach((s) => (stats[s] = 1));
+        for (let i = 0; i < POOL; i++) {
+          const open = STATS.filter((s) => stats[s] < MAX);
+          stats[open[Math.floor(Math.random() * open.length)]]++;
+        }
+      };
       let rolling = false;
       $('reroll').addEventListener('click', () => {
         if (rolling) return;
@@ -315,10 +358,11 @@ import sprites from '../../data/sprites.json';
         let t = 0;
         const iv = setInterval(() => {
           spriteIdx = randomFree();
-          $('sprite').src = BASE + IDS[spriteIdx] + '.webp';
-          $('spriteno').textContent = `sprite #${IDS[spriteIdx]} / ${IDS.length}`;
+          randomStats();
+          render();
           if (++t >= 7) {
             clearInterval(iv);
+            $('poolerr').hidden = true;
             $('sprite').classList.add('flash');
             setTimeout(() => $('sprite').classList.remove('flash'), 320);
             rolling = false;
