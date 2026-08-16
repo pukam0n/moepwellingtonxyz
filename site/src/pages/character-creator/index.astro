@@ -382,7 +382,7 @@ import sprites from '../../data/sprites.json';
           const res = await fetch(REG + '/claim', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ sprite: IDS[spriteIdx], name }),
+            body: JSON.stringify({ sprite: IDS[spriteIdx], name, stats, klass }),
           });
           const data = await res.json();
           if (res.status === 201) {
@@ -413,9 +413,11 @@ import sprites from '../../data/sprites.json';
           const res = await fetch(REG + '/me?token=' + encodeURIComponent(token.trim()));
           if (!res.ok) return showErr('unknown token. the archive does not remember you.');
           const c = await res.json();
+          // server-kopie der attribute übernehmen, falls vorhanden
+          if (c.stats && STATS.every((s) => s in c.stats)) Object.assign(stats, c.stats);
           persist({
             name: c.name, sprite: c.sprite, num: c.num, gen: c.gen,
-            stats, klass: classOf()[0], token: token.trim(), created: c.created,
+            stats, klass: c.klass || classOf()[0], token: token.trim(), created: c.created,
           });
           spriteIdx = Math.max(0, IDS.indexOf(c.sprite));
           $('cname').value = c.name;
