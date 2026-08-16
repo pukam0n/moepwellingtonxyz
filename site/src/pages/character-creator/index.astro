@@ -2,7 +2,7 @@
 // character creator: eigenständige seite im canvas-look mit subtilem
 // morrowind-einschlag. 266 sprites, endlose rerolls, platzhalter-attribute,
 // klasse wird aus dem dominanten attribut "gewürfelt". speichert in localStorage.
-import { SITE, url } from '../../data/site.js';
+import { SITE, url, REGISTRY } from '../../data/site.js';
 import sprites from '../../data/sprites.json';
 ---
 
@@ -15,7 +15,7 @@ import sprites from '../../data/sprites.json';
     <link rel="icon" href={url('/favicon.svg')} type="image/svg+xml" />
     <title>character creator — {SITE.name}</title>
   </head>
-  <body data-sprites={JSON.stringify(sprites.ids)} data-spritebase={url('/sprites/')}>
+  <body data-sprites={JSON.stringify(sprites.ids)} data-spritebase={url('/sprites/')} data-registry={REGISTRY}>
     <div id="topbar">
       <span class="tb-title">character creator</span>
       <span class="sp"></span>
@@ -26,6 +26,7 @@ import sprites from '../../data/sprites.json';
       <div class="win" id="creator">
         <div class="win-title"><span class="sq r"></span><span class="sq b"></span> ▓▒ new-character.cfg ░▓</div>
         <p class="dim opener">go on. take your time. the archive keeps no schedule.</p>
+        <p class="dim small" id="regline"></p>
 
         <div class="row">
           <label class="lbl" for="cname">name</label>
@@ -58,8 +59,13 @@ import sprites from '../../data/sprites.json';
         </div>
 
         <button id="create">CREATE CHARACTER</button>
+        <p class="small" id="err" hidden></p>
         <p class="dim small" id="saved" hidden>
-          saved. <a href={url('/')}>return to the archive →</a>
+          saved. <a id="dl" download="character.txt" href="#">download character.txt</a> ·
+          <a href={url('/')}>return to the archive →</a>
+        </p>
+        <p class="dim small" id="restore-line">
+          <a href="#" id="restore">restore from character.txt →</a>
         </p>
       </div>
     </main>
@@ -135,6 +141,10 @@ import sprites from '../../data/sprites.json';
         box-shadow: 3px 3px 0 var(--shadow); image-rendering: pixelated;
       }
       #sprite.flash { animation: spriteflash 0.3s ease-out; }
+      /* generationen: die kopie der kopie — gespiegelt, invertiert, beides */
+      .gen-2 { transform: scaleX(-1); }
+      .gen-3 { filter: invert(1); }
+      .gen-4 { transform: scaleX(-1); filter: invert(1); }
       @keyframes spriteflash { 0% { filter: brightness(1.8) contrast(0.6); } 100% { filter: brightness(1); } }
       .tinybtn {
         padding: 2px 10px; background: #efe9d8; border: 2px solid var(--border);
@@ -185,11 +195,45 @@ import sprites from '../../data/sprites.json';
       };
       const POOL = 10, MAX = 5;
 
+      const REG = document.body.dataset.registry;
+      let taken = new Set();
+      let gen = 1;
+
       const saved = JSON.parse(localStorage.getItem('mpwCharacter') || 'null');
       let spriteIdx = saved ? IDS.indexOf(saved.sprite) : Math.floor(Math.random() * IDS.length);
       if (spriteIdx < 0) spriteIdx = 0;
       const stats = saved?.stats ? { ...saved.stats } : Object.fromEntries(STATS.map((s) => [s, 1]));
       if (saved?.name) $('cname').value = saved.name;
+
+      // generation-optik: gen 2 gespiegelt, gen 3 invertiert, gen 4 beides —
+      // danach beginnt der zyklus von vorn (die kopie der kopie der kopie)
+      const genClass = (g) => 'gen-' + (((g - 1) % 4) + 1);
+
+      const freeIdxs = () => IDS.map((id, i) => i).filter((i) => !taken.has(IDS[i]));
+      const randomFree = () => {
+        const free = freeIdxs();
+        return free.length ? free[Math.floor(Math.random() * free.length)] : spriteIdx;
+      };
+
+      async function loadRegistry() {
+        if (!REG) {
+          $('regline').textContent = 'local mode — this character exists only in this browser.';
+          return;
+        }
+        try {
+          const s = await (await fetch(REG + '/status')).json();
+          gen = s.gen;
+          taken = new Set(s.taken);
+          $('regline').textContent = `generation ${s.gen} · ${s.remaining} of ${IDS.length} sprites remain · every character exists once`;
+          $('sprite').className = genClass(gen);
+          if (taken.has(IDS[spriteIdx]) && !saved) {
+            spriteIdx = randomFree();
+            render();
+          }
+        } catch {
+          $('regline').textContent = 'registry unreachable — running in local mode.';
+        }
+      }
 
       const spent = () => STATS.reduce((a, s) => a + stats[s] - 1, 0);
 
@@ -223,14 +267,15 @@ import sprites from '../../data/sprites.json';
         render();
       });
 
-      // reroll mit kurzem slot-machine-geflacker — unendlich oft erlaubt
+      // reroll mit kurzem slot-machine-geflacker — unendlich oft erlaubt,
+      // im registry-modus nur über die noch freien sprites
       let rolling = false;
       $('reroll').addEventListener('click', () => {
         if (rolling) return;
         rolling = true;
         let t = 0;
         const iv = setInterval(() => {
-          spriteIdx = Math.floor(Math.random() * IDS.length);
+          spriteIdx = randomFree();
           $('sprite').src = BASE + IDS[spriteIdx] + '.webp';
           $('spriteno').textContent = `sprite #${IDS[spriteIdx]} / ${IDS.length}`;
           if (++t >= 7) {
@@ -242,21 +287,90 @@ import sprites from '../../data/sprites.json';
         }, 70);
       });
 
-      $('create').addEventListener('click', () => {
-        const name = $('cname').value.trim() || 'unnamed';
-        const [klass] = classOf();
-        localStorage.setItem('mpwCharacter', JSON.stringify({
-          name,
-          sprite: IDS[spriteIdx],
-          stats,
-          klass,
-          created: saved?.created || new Date().toISOString(),
-        }));
+      const showErr = (msg) => {
+        $('err').textContent = msg;
+        $('err').hidden = false;
+      };
+
+      function persist(character) {
+        localStorage.setItem('mpwCharacter', JSON.stringify(character));
+        const lines = [
+          '== moepwellington.xyz — character file ==',
+          `name:      ${character.name}`,
+          `class:     ${character.klass}`,
+          `sprite:    #${character.sprite} / ${IDS.length}`,
+          character.num ? `character: #${character.num} · generation ${character.gen}` : 'mode:      local',
+          `stats:     ${STATS.map((s) => `${s} ${character.stats[s]}`).join(' · ')}`,
+          `created:   ${character.created}`,
+          '',
+          character.token
+            ? `recovery token (keep this — it is the only proof this character is yours):\n${character.token}`
+            : 'no token — local character, lives in this browser only.',
+        ].join('\n');
+        $('dl').href = URL.createObjectURL(new Blob([lines], { type: 'text/plain' }));
+        $('err').hidden = true;
         $('saved').hidden = false;
         $('saved').scrollIntoView({ block: 'nearest' });
+      }
+
+      $('create').addEventListener('click', async () => {
+        const name = $('cname').value.trim() || 'unnamed';
+        const [klass] = classOf();
+        const base = { name, sprite: IDS[spriteIdx], stats, klass, created: new Date().toISOString() };
+        if (!REG) {
+          persist({ ...base, created: saved?.created || base.created });
+          return;
+        }
+        $('create').disabled = true;
+        try {
+          const res = await fetch(REG + '/claim', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ sprite: IDS[spriteIdx], name }),
+          });
+          const data = await res.json();
+          if (res.status === 201) {
+            persist({ ...base, num: data.num, gen: data.gen, token: data.token, created: data.created });
+          } else if (data.error === 'name_taken') {
+            showErr('this name is already walking the archive. choose another.');
+          } else if (data.error === 'sprite_taken') {
+            showErr('someone claimed this sprite seconds ago. rerolling…');
+            await loadRegistry();
+            spriteIdx = randomFree();
+            render();
+          } else {
+            showErr('the registry refused. try again.');
+          }
+        } catch {
+          showErr('registry unreachable. try again later.');
+        }
+        $('create').disabled = false;
+      });
+
+      // wiederherstellung über das token aus der character.txt
+      $('restore').addEventListener('click', async (e) => {
+        e.preventDefault();
+        if (!REG) return showErr('local mode — nothing to restore from.');
+        const token = prompt('paste your recovery token:');
+        if (!token) return;
+        try {
+          const res = await fetch(REG + '/me?token=' + encodeURIComponent(token.trim()));
+          if (!res.ok) return showErr('unknown token. the archive does not remember you.');
+          const c = await res.json();
+          persist({
+            name: c.name, sprite: c.sprite, num: c.num, gen: c.gen,
+            stats, klass: classOf()[0], token: token.trim(), created: c.created,
+          });
+          spriteIdx = Math.max(0, IDS.indexOf(c.sprite));
+          $('cname').value = c.name;
+          render();
+        } catch {
+          showErr('registry unreachable. try again later.');
+        }
       });
 
       render();
+      loadRegistry();
     </script>
   </body>
 </html>

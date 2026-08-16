@@ -56,6 +56,17 @@ damit wird auf allen seiten cookielos gezählt und die node zeigt echte zahlen (
 
 eigene seite im canvas-look mit subtilem morrowind-einschlag: name, sprite-reroll (266 sprites unter `site/public/sprites/`, unendlich rerolls), 10 verteilbare platzhalter-attribute (literacy/intention/memory/noise/patience), klasse wird aus dem dominanten attribut bestimmt (the exegete, the archivist, the static shepherd, …). "CREATE CHARACTER" speichert in localStorage; auf dem canvas erscheint dann oben links ein **gelocktes fenster** mit avatar, name, klasse und sprite-nummer (fixed, kamera-unabhängig; klick führt zurück in den creator). texte/klassen/attribute sind bewusst platzhalter zum kuratieren — alles in `site/src/pages/character-creator/index.astro`.
 
+## avatar registry (unikate charaktere, `workers/avatar-registry/`)
+
+cloudflare worker + durable object als zentrales "standesamt": jeder sprite pro **generation** nur 1x vergebbar, jeder **name global** 1x, besitz ohne anmeldung über ein geheimes **recovery-token** (steht in der herunterladbaren `character.txt`). sind alle 266 sprites einer generation vergeben, startet die nächste — gen 2 gespiegelt, gen 3 invertiert, gen 4 beides, dann zyklus.
+
+**deployen (einmalig, ~10 min):**
+1. in `workers/avatar-registry/`: `npx wrangler deploy` (loggt dich beim ersten mal bei cloudflare ein) — alternativ `src/index.ts` + `wrangler.jsonc` in dein lokal gescaffoldetes worker-projekt kopieren und von dort deployen
+2. die ausgegebene url (z. b. `https://avatar-registry.xyz.workers.dev`) in `site/src/data/site.js` bei `REGISTRY` eintragen
+3. datenschutzerklärung: absatz ergänzen, dass beim charakter-erstellen ein frei gewählter name + zeitpunkt auf cloudflare gespeichert wird (rechtsgrundlage art. 6 abs. 1 lit. a/f DSGVO); keine ip-speicherung durch unseren code
+
+ohne konfigurierte `REGISTRY` läuft der creator im **lokalen modus** (klar gelabelt, keine unikate, kein server).
+
 ## vor dem launch (TODOs im code markiert)
 
 1. **impressum** ausfüllen: `site/src/pages/info/impressum.astro` (bürgerlicher name, anschrift, e-mail)
