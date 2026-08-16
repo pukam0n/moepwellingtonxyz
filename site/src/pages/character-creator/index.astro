@@ -89,7 +89,12 @@ import sprites from '../../data/sprites.json';
         line-height: 1.35; color: var(--text); background: var(--bg);
         background-image: radial-gradient(rgba(255, 255, 255, 0.13) 1px, transparent 1px);
         background-size: 7px 7px; image-rendering: pixelated; min-height: 100dvh;
+        /* keine versehentliche auswahl beim rumklicken */
+        user-select: none;
+        -webkit-user-select: none;
       }
+      img { -webkit-user-drag: none; user-drag: none; }
+      input, textarea { user-select: text; -webkit-user-select: text; }
       a { color: inherit; }
       button { font: inherit; cursor: pointer; user-select: none; }
       .dim { opacity: 0.65; }
