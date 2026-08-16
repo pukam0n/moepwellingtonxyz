@@ -272,12 +272,16 @@ an abstract parameter.</pre>
     </div>
 
     <!-- gelocktes charakter-fenster: fix in der ecke, unabhängig von der kamera -->
-    <div id="charwin" class="hidden" title="edit character" data-spritebase={url('/sprites/')} data-href={url('/character-creator/')}>
-      <div class="win-title"><span class="sq y"></span> ▒ you ░</div>
-      <img id="charimg" alt="your character" width="256" height="256" />
-      <div id="charname" class="small"></div>
+    <div id="charwin" class="hidden" data-spritebase={url('/sprites/')} data-href={url('/character-creator/')}>
+      <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▒▓ you ░▒</div>
+      <img id="charimg" alt="your character" width="256" height="256" title="edit character" />
+      <div id="charname"></div>
       <div id="charclass" class="small dim"></div>
+      <hr class="chr" />
+      <div id="charstats"></div>
+      <hr class="chr" />
       <div id="charno" class="small dim"></div>
+      <div class="small dim charfoot">the archive remembers you.</div>
     </div>
 
     <div id="zoomctl">
@@ -470,20 +474,26 @@ an abstract parameter.</pre>
       }
       .ccbtn:active { transform: translate(2px, 2px); box-shadow: none; }
 
-      /* gelocktes charakter-fenster oben links (fixed, kamera-unabhängig) */
+      /* gelocktes charakter-fenster oben links — das inoffizielle side-menü.
+         fixed, kamera-unabhängig; über die character-creator-zeile minimierbar */
       #charwin {
-        position: fixed; top: 58px; left: 12px; z-index: 90; width: 150px;
+        position: fixed; top: 58px; left: 12px; z-index: 90; width: 192px;
         background-color: var(--win-alt); border: 2px solid var(--border);
         box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45), inset 0 0 0 2px rgba(255, 255, 255, 0.4);
         background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.055) 0% 25%, transparent 0% 50%);
-        background-size: 6px 6px; padding: 8px 10px 10px; cursor: pointer;
+        background-size: 6px 6px; padding: 8px 12px 10px;
       }
-      #charwin .win-title { cursor: pointer; margin: -2px -4px 6px; }
+      #charwin .win-title { cursor: default; margin: -2px -6px 8px; }
       #charimg {
         display: block; width: 100%; height: auto;
         border: 2px solid var(--border); background: #efe9d8;
-        image-rendering: pixelated; margin-bottom: 4px;
+        image-rendering: pixelated; margin-bottom: 6px; cursor: pointer;
       }
+      #charname { font-size: 19px; letter-spacing: 1px; overflow-wrap: anywhere; }
+      #charwin .chr { border: none; border-top: 2px dashed rgba(0, 0, 0, 0.25); margin: 7px 0; }
+      .csrow { display: flex; justify-content: space-between; font-size: 13px; opacity: 0.85; line-height: 1.5; }
+      .csrow .csbar { letter-spacing: 1px; }
+      .charfoot { margin-top: 4px; font-size: 12px; }
       /* generationen-optik wie im creator */
       #charimg.gen-2 { transform: scaleX(-1); }
       #charimg.gen-3 { filter: invert(1); }
@@ -968,6 +978,8 @@ an abstract parameter.</pre>
       })();
 
       // ---------- charakter-fenster (aus dem creator, localStorage) ----------
+      // existiert ein charakter: creator-fenster verschwindet, die
+      // character-creator-zeile im root minimiert/öffnet stattdessen das side-menü
       (() => {
         const c = JSON.parse(localStorage.getItem('mpwCharacter') || 'null');
         if (!c) return;
@@ -979,8 +991,34 @@ an abstract parameter.</pre>
         $('charno').textContent = c.num
           ? `character #${c.num} · gen ${c.gen}`
           : `character #${c.sprite} / 266`;
-        box.classList.remove('hidden');
-        box.addEventListener('click', () => (location.href = box.dataset.href));
+        const CSTATS = ['literacy', 'bandwidth', 'provenance', 'friction', 'patience'];
+        if (c.stats && CSTATS.every((s) => s in c.stats)) {
+          $('charstats').innerHTML = CSTATS.map(
+            (s) => `<div class="csrow"><span>${s}</span><span class="csbar">${'▮'.repeat(c.stats[s])}${'▯'.repeat(5 - c.stats[s])}</span></div>`
+          ).join('');
+        }
+        $('charimg').addEventListener('click', () => (location.href = box.dataset.href));
+
+        // creator-fenster dauerhaft aus; zeile im root wird zum toggle
+        openState['win-cc'] = false;
+        const ccRow = document.querySelector('.trow[data-win="win-cc"]');
+        if (ccRow) {
+          ccRow.removeAttribute('data-win'); // entkoppelt vom fenster-toggle
+          const sync = () => {
+            const open = prefs.charwin !== false;
+            box.classList.toggle('hidden', !open);
+            ccRow.querySelector('.ind').textContent = open ? '[x]' : '[ ]';
+            ccRow.classList.toggle('on', open);
+          };
+          ccRow.addEventListener('click', () => {
+            prefs.charwin = prefs.charwin === false;
+            savePrefs();
+            sync();
+          });
+          sync();
+        } else {
+          box.classList.remove('hidden');
+        }
       })();
 
       // ---------- hilfe ----------

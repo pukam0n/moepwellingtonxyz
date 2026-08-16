@@ -31,6 +31,7 @@ import sprites from '../../data/sprites.json';
         <div class="row">
           <label class="lbl" for="cname">name</label>
           <input id="cname" type="text" maxlength="24" spellcheck="false" placeholder="who is operating this interface?" />
+          <span class="reqerr" id="nameerr" hidden>(name required)</span>
         </div>
 
         <div class="row sprite-row">
@@ -46,6 +47,7 @@ import sprites from '../../data/sprites.json';
           <span class="lbl">attributes</span>
           <div class="stats">
             <div class="dim small" id="pool">10 points unassigned</div>
+            <span class="reqerr" id="poolerr" hidden>(assign all points)</span>
             <div id="statrows"></div>
           </div>
         </div>
@@ -132,6 +134,8 @@ import sprites from '../../data/sprites.json';
         border-bottom: 2px solid rgba(0, 0, 0, 0.4); font: inherit; color: var(--text);
         outline: none; padding: 1px 0; caret-color: #c81111;
       }
+      #cname.bad { border-bottom-color: #c81111; }
+      .reqerr { color: #c81111; font-size: 15px; }
 
       .sprite-row { align-items: center; }
       .spritebox { flex: 1; }
@@ -183,15 +187,43 @@ import sprites from '../../data/sprites.json';
       const IDS = JSON.parse(document.body.dataset.sprites);
       const BASE = document.body.dataset.spritebase;
 
-      // platzhalter-attribute + klassen (kryptisch-akademisch, wird noch kuratiert)
-      const STATS = ['literacy', 'intention', 'memory', 'noise', 'patience'];
+      // attribute: lesen · aufnehmen · herkunft · widerstand · warten
+      const STATS = ['literacy', 'bandwidth', 'provenance', 'friction', 'patience'];
+      // klasse = dominantes + zweites attribut -> 20 subklassen.
+      // gleichstände werden über die feste attribut-reihenfolge aufgelöst.
+      // ausnahme: die perfekte verteilung 3/3/3/3/3 ergibt "the reproduction".
       const CLASSES = {
-        literacy: ['the exegete', 'reads the interface as scripture. finds no author — only commentary.'],
-        intention: ['the operator', 'still believes the button and the deed are the same thing.'],
-        memory: ['the archivist', 'curator of the false memory of software. keeps what the copy forgets.'],
-        noise: ['the static shepherd', 'tends signals that refuse to become information.'],
-        patience: ['the buffering monk', 'has seen 99 percent and chosen to stay.'],
-        balanced: ['the reproduction', 'indistinguishable from an original that never existed.'],
+        reproduction: ['the reproduction', 'perfectly distributed. indistinguishable from an original that never existed.'],
+        literacy: {
+          bandwidth: ['the footnote maximalist', 'no text ends. every reference opens another door.'],
+          provenance: ['the meme historian', 'traces the image back through a thousand reposts to a joke nobody made.'],
+          friction: ['the institutional critic', 'reads the building, not the plaque.'],
+          patience: ['the slow critic', 'still writing the review. the work has already been deleted.'],
+        },
+        bandwidth: {
+          literacy: ['the dataset scavenger', 'eats what the crawlers left behind.'],
+          provenance: ['the contamination archivist', 'keeps records of what got in, and how.'],
+          friction: ['the glitch auteur', 'signs the error as if it were a decision.'],
+          patience: ['the render hermit', 'left for the render farm years ago. sends frames.'],
+        },
+        provenance: {
+          literacy: ['the forensic curator', 'exhibits the evidence. refuses to name a suspect.'],
+          bandwidth: ['the rights-holder', 'owns a percentage of everything you have ever seen.'],
+          friction: ['the claimant', 'files disputes against the horizon.'],
+          patience: ['the conservator', 'keeps the original at 18 degrees. tells no one where.'],
+        },
+        friction: {
+          literacy: ['the poor-image theologian', 'finds grace in the artifact of the artifact.'],
+          bandwidth: ['the compression ascetic', 'believes what survives compression deserved to.'],
+          provenance: ['the material witness', 'was there when it was still an object.'],
+          patience: ['the craft fundamentalist', 'insists it must hurt the hands to count.'],
+        },
+        patience: {
+          literacy: ['the auteurist', 'waits for intent to appear in the credits.'],
+          bandwidth: ['the slop auteur', 'generates until quantity confesses to being a style.'],
+          provenance: ['the labor romantic', 'believes the hours are stored in the file.'],
+          friction: ['the director', 'says stop. nothing stops. says stop again.'],
+        },
       };
       const POOL = 10, MAX = 5;
 
@@ -202,7 +234,11 @@ import sprites from '../../data/sprites.json';
       const saved = JSON.parse(localStorage.getItem('mpwCharacter') || 'null');
       let spriteIdx = saved ? IDS.indexOf(saved.sprite) : Math.floor(Math.random() * IDS.length);
       if (spriteIdx < 0) spriteIdx = 0;
-      const stats = saved?.stats ? { ...saved.stats } : Object.fromEntries(STATS.map((s) => [s, 1]));
+      // alte gespeicherte charaktere mit anderen attribut-namen: stats zurücksetzen
+      const stats =
+        saved?.stats && STATS.every((s) => s in saved.stats)
+          ? { ...saved.stats }
+          : Object.fromEntries(STATS.map((s) => [s, 1]));
       if (saved?.name) $('cname').value = saved.name;
 
       // generation-optik: gen 2 gespiegelt, gen 3 invertiert, gen 4 beides —
@@ -238,9 +274,11 @@ import sprites from '../../data/sprites.json';
       const spent = () => STATS.reduce((a, s) => a + stats[s] - 1, 0);
 
       function classOf() {
-        const max = Math.max(...STATS.map((s) => stats[s]));
-        const tops = STATS.filter((s) => stats[s] === max);
-        return tops.length === 1 ? CLASSES[tops[0]] : CLASSES.balanced;
+        if (STATS.every((s) => stats[s] === 3)) return CLASSES.reproduction;
+        const order = [...STATS].sort(
+          (a, b) => stats[b] - stats[a] || STATS.indexOf(a) - STATS.indexOf(b)
+        );
+        return CLASSES[order[0]][order[1]];
       }
 
       function render() {
@@ -264,6 +302,7 @@ import sprites from '../../data/sprites.json';
         const b = e.target.closest('button[data-s]');
         if (!b || b.disabled) return;
         stats[b.dataset.s] += Number(b.dataset.d);
+        if (spent() === POOL) $('poolerr').hidden = true;
         render();
       });
 
@@ -313,8 +352,25 @@ import sprites from '../../data/sprites.json';
         $('saved').scrollIntoView({ block: 'nearest' });
       }
 
+      $('cname').addEventListener('input', () => {
+        $('nameerr').hidden = true;
+        $('cname').classList.remove('bad');
+      });
+
       $('create').addEventListener('click', async () => {
-        const name = $('cname').value.trim() || 'unnamed';
+        const name = $('cname').value.trim();
+        // pflichtfelder: ohne name und ohne volle punkteverteilung kein charakter
+        let blocked = false;
+        if (!name) {
+          $('nameerr').hidden = false;
+          $('cname').classList.add('bad');
+          blocked = true;
+        }
+        if (spent() !== POOL) {
+          $('poolerr').hidden = false;
+          blocked = true;
+        }
+        if (blocked) return;
         const [klass] = classOf();
         const base = { name, sprite: IDS[spriteIdx], stats, klass, created: new Date().toISOString() };
         if (!REG) {
@@ -326,7 +382,7 @@ import sprites from '../../data/sprites.json';
           const res = await fetch(REG + '/claim', {
             method: 'POST',
             headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ sprite: IDS[spriteIdx], name }),
+            body: JSON.stringify({ sprite: IDS[spriteIdx], name, stats, klass }),
           });
           const data = await res.json();
           if (res.status === 201) {
@@ -357,9 +413,11 @@ import sprites from '../../data/sprites.json';
           const res = await fetch(REG + '/me?token=' + encodeURIComponent(token.trim()));
           if (!res.ok) return showErr('unknown token. the archive does not remember you.');
           const c = await res.json();
+          // server-kopie der attribute übernehmen, falls vorhanden
+          if (c.stats && STATS.every((s) => s in c.stats)) Object.assign(stats, c.stats);
           persist({
             name: c.name, sprite: c.sprite, num: c.num, gen: c.gen,
-            stats, klass: classOf()[0], token: token.trim(), created: c.created,
+            stats, klass: c.klass || classOf()[0], token: token.trim(), created: c.created,
           });
           spriteIdx = Math.max(0, IDS.indexOf(c.sprite));
           $('cname').value = c.name;

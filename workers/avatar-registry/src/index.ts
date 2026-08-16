@@ -55,6 +55,9 @@ type Character = {
   sprite: string;
   name: string;
   created: string;
+  // vom client mitgeliefert, damit restore attribute + klasse wiederherstellt
+  stats?: Record<string, number>;
+  klass?: string;
 };
 
 const json = (data: unknown, status = 200) =>
@@ -82,7 +85,7 @@ export class Registry {
     }
 
     if (url.pathname === '/claim' && req.method === 'POST') {
-      let body: { sprite?: string; name?: string };
+      let body: { sprite?: string; name?: string; stats?: Record<string, number>; klass?: string };
       try {
         body = await req.json();
       } catch {
@@ -90,6 +93,16 @@ export class Registry {
       }
       const sprite = String(body.sprite ?? '');
       const name = String(body.name ?? '').trim();
+      // stats/klasse: locker validiert, rein informativ (für restore)
+      const stats =
+        body.stats && typeof body.stats === 'object'
+          ? Object.fromEntries(
+              Object.entries(body.stats)
+                .slice(0, 8)
+                .map(([k, v]) => [String(k).slice(0, 24), Math.max(0, Math.min(9, Number(v) || 0))])
+            )
+          : undefined;
+      const klass = body.klass ? String(body.klass).slice(0, 64) : undefined;
       if (!/^\d{3}$/.test(sprite) || Number(sprite) >= SPRITE_COUNT) {
         return json({ error: 'bad_sprite' }, 400);
       }
@@ -113,6 +126,8 @@ export class Registry {
         sprite,
         name,
         created: new Date().toISOString(),
+        stats,
+        klass,
       };
       await storage.put({
         count: num,
