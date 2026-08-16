@@ -334,7 +334,12 @@ an abstract parameter.</pre>
         background: var(--bg);
         image-rendering: pixelated;
         overscroll-behavior: none;
+        /* keine versehentliche text-/bildauswahl beim navigieren */
+        user-select: none;
+        -webkit-user-select: none;
       }
+      img { -webkit-user-drag: none; user-drag: none; }
+      input, textarea { user-select: text; -webkit-user-select: text; }
       a { color: inherit; }
       button { font: inherit; cursor: pointer; user-select: none; }
       .hidden { display: none !important; }

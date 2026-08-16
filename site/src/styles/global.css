@@ -216,6 +216,8 @@ main {
   width: 100%;
   height: auto;
   border: 1px solid var(--line);
+  -webkit-user-drag: none;
+  user-select: none;
 }
 figcaption {
   padding-top: 0.5rem;
