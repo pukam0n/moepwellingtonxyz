@@ -12,6 +12,11 @@ export const url = (p) => BASE + p;
 // counts on your website" aktivieren, code hier eintragen.
 export const GOATCOUNTER = '';
 
+// url des avatar-registry-workers (cloudflare), z. b.
+// 'https://avatar-registry.DEIN-SUBDOMAIN.workers.dev' — leer = lokaler modus
+// (keine unikate, kein server; charakter existiert nur im eigenen browser).
+export const REGISTRY = '';
+
 // social-preview-bild (og:image) für geteilte links
 export const OG_IMAGE = '/art/2026/untitled-13.webp';
 

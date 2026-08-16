@@ -1,0 +1,9 @@
+{
+  "name": "avatar-registry",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-08-01",
+  "durable_objects": {
+    "bindings": [{ "name": "REGISTRY", "class_name": "Registry" }]
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Registry"] }]
+}

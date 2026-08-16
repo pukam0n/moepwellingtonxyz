@@ -484,6 +484,10 @@ an abstract parameter.</pre>
         border: 2px solid var(--border); background: #efe9d8;
         image-rendering: pixelated; margin-bottom: 4px;
       }
+      /* generationen-optik wie im creator */
+      #charimg.gen-2 { transform: scaleX(-1); }
+      #charimg.gen-3 { filter: invert(1); }
+      #charimg.gen-4 { transform: scaleX(-1); filter: invert(1); }
       @media (max-width: 1100px) { #charwin { display: none; } }
       .proxyimg {
         display: block; width: 100%; height: auto;
@@ -969,9 +973,12 @@ an abstract parameter.</pre>
         if (!c) return;
         const box = $('charwin');
         $('charimg').src = box.dataset.spritebase + c.sprite + '.webp';
+        if (c.gen) $('charimg').className = 'gen-' + (((c.gen - 1) % 4) + 1);
         $('charname').textContent = c.name;
         $('charclass').textContent = c.klass;
-        $('charno').textContent = `character #${c.sprite} / 266`;
+        $('charno').textContent = c.num
+          ? `character #${c.num} · gen ${c.gen}`
+          : `character #${c.sprite} / 266`;
         box.classList.remove('hidden');
         box.addEventListener('click', () => (location.href = box.dataset.href));
       })();
