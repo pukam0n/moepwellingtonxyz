@@ -18,15 +18,14 @@ export const GOATCOUNTER = 'moepwellington';
 export const REGISTRY = 'https://avatar-registry.moepwellington.workers.dev';
 
 // social-preview-bild (og:image) für geteilte links
-export const OG_IMAGE = '/art/2026/untitled-13.webp';
+export const OG_IMAGE = '/art/2026/untitled-04.webp';
 
 export const SITE = {
   name: 'moe p. wellington',
   series: 'art in the age of artificial reproduction',
   seriesSlug: 'art-in-the-age-of-artificial-reproduction_2022-2026',
   span: '2022–2026',
-  description:
-    'moe p. wellington — ai art portfolio. art in the age of artificial reproduction, 2022–2026.',
+  description: 'art portfolio. art in the age of artificial reproduction.',
   // TODO: echte profile eintragen (nur links, keine embeds/widgets)
   socials: [
     { label: 'twitter/x', href: 'https://x.com/moepwellington' },
