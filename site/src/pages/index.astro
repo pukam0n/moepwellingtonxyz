@@ -535,6 +535,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       .thumbrow img { width: 64px; height: 64px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; }
 
       .vbar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+      /* feste breite, damit "9/39" -> "10/39" die zeile nicht umbrechen lässt */
+      #vpage { min-width: 3.4em; text-align: center; }
       #slots { width: 90px; accent-color: var(--cable); }
       #vslots { display: grid; gap: 10px; }
       #vslots[data-slots='1'] { grid-template-columns: 1fr; }
