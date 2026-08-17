@@ -599,10 +599,14 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       .lbbar button:hover { background: #1233c8; }
 
       @media (max-width: 1100px) {
+        /* topbar: zweizeilig (titel + links) statt abgeschnitten; scrollt mit */
+        #topbar { position: static; height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px 10px; white-space: normal; }
+        #topbar .tb-title { width: 100%; font-size: 20px; }
+        #topbar .sp, #helpbtn, #helpwin { display: none !important; }
         #vp { position: static; overflow: visible; height: auto; cursor: default; touch-action: auto; }
         /* mobile: aufs wesentliche — viewer zuerst, dann generate.exe,
            dann das root-fenster, danach der rest in gewohnter reihenfolge */
-        #canvas { position: static; width: auto; height: auto; transform: none !important; padding: 48px 12px 12px; display: flex; flex-direction: column; }
+        #canvas { position: static; width: auto; height: auto; transform: none !important; padding: 12px; display: flex; flex-direction: column; }
         .win { position: static !important; width: 100% !important; max-width: 560px; margin: 0 auto 18px; order: 10; }
         #win-viewer { order: 1; }
         #win-gen { order: 2; }
