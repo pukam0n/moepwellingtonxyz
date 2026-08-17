@@ -8,6 +8,9 @@
 //                            201 { num, gen, sprite, name, token, created }
 //                            409 { error: "sprite_taken" | "name_taken" }
 //   GET  /me?token=...    -> gespeicherter charakter oder 404
+//   POST /repair          -> body { token, stats?, klass? }
+//                            trägt NUR fehlende attribute/klasse nach
+//                            (für alte claims ohne stats) — nie überschreiben
 //
 // generationen: sind alle 266 sprites einer generation vergeben, beginnt die
 // nächste — gleiche sprites, neue runde (gespiegelt / invertiert rendert der
@@ -136,6 +139,36 @@ export class Registry {
         ['token:' + token]: character,
       });
       return json({ ...character, token }, 201);
+    }
+
+    if (url.pathname === '/repair' && req.method === 'POST') {
+      // nachtrag für alte charaktere, deren claim noch keine attribute
+      // gespeichert hat: füllt NUR fehlende felder auf — bestehende stats
+      // und klasse sind unantastbar (entscheidung auf lebenszeit)
+      let body: { token?: string; stats?: Record<string, number>; klass?: string };
+      try {
+        body = await req.json();
+      } catch {
+        return json({ error: 'bad_request' }, 400);
+      }
+      const key = 'token:' + String(body.token ?? '');
+      const character = await storage.get<Character>(key);
+      if (!character) return json({ error: 'not_found' }, 404);
+      let changed = false;
+      if (!character.stats && body.stats && typeof body.stats === 'object') {
+        character.stats = Object.fromEntries(
+          Object.entries(body.stats)
+            .slice(0, 8)
+            .map(([k, v]) => [String(k).slice(0, 24), Math.max(0, Math.min(9, Number(v) || 0))])
+        );
+        changed = true;
+      }
+      if (!character.klass && body.klass) {
+        character.klass = String(body.klass).slice(0, 64);
+        changed = true;
+      }
+      if (changed) await storage.put(key, character);
+      return json(character);
     }
 
     if (url.pathname === '/me') {

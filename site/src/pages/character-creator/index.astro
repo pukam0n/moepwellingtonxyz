@@ -452,21 +452,42 @@ import sprites from '../../data/sprites.json';
         $('create').disabled = false;
       });
 
-      // wiederherstellung über das token aus der character.txt
+      // wiederherstellung: token ODER komplette character.txt einfügen.
+      // kennt der server die attribute nicht (alte claims), werden sie aus
+      // der eingefügten datei gelesen und per /repair dauerhaft nachgetragen
       $('restore').addEventListener('click', async (e) => {
         e.preventDefault();
         if (!REG) return showErr('local mode — nothing to restore from.');
-        const token = prompt('paste your recovery token:');
-        if (!token) return;
+        const input = prompt('paste your recovery token (or the whole character.txt):');
+        if (!input) return;
+        // token aus beliebigem text fischen (doppel-uuid, 73 zeichen)
+        const tm = input.match(/[0-9a-f-]{60,90}/i);
+        const token = (tm ? tm[0] : input).trim();
+        // stats-zeile der character.txt: "literacy 3 · bandwidth 2 · …"
+        const fileStats = {};
+        for (const s of STATS) {
+          const m = input.match(new RegExp(s + '\\s+([0-9])'));
+          if (m) fileStats[s] = Number(m[1]);
+        }
+        const hasAll = (o) => o && STATS.every((s) => s in o);
         try {
-          const res = await fetch(REG + '/me?token=' + encodeURIComponent(token.trim()));
+          const res = await fetch(REG + '/me?token=' + encodeURIComponent(token));
           if (!res.ok) return showErr('unknown token. the archive does not remember you.');
-          const c = await res.json();
-          // server-kopie der attribute übernehmen, falls vorhanden
-          if (c.stats && STATS.every((s) => s in c.stats)) Object.assign(stats, c.stats);
+          let c = await res.json();
+          if (!hasAll(c.stats) && hasAll(fileStats)) {
+            const r = await fetch(REG + '/repair', {
+              method: 'POST',
+              headers: { 'content-type': 'application/json' },
+              body: JSON.stringify({ token, stats: fileStats, klass: c.klass }),
+            }).catch(() => null);
+            if (r && r.ok) c = await r.json();
+            else c.stats = fileStats;
+          }
+          if (hasAll(c.stats)) Object.assign(stats, c.stats);
+          else showErr('note: the registry has no attributes for this character — paste your full character.txt to restore them.');
           persist({
             name: c.name, sprite: c.sprite, num: c.num, gen: c.gen,
-            stats, klass: c.klass || classOf()[0], token: token.trim(), created: c.created,
+            stats, klass: c.klass || classOf()[0], token, created: c.created,
           });
           spriteIdx = Math.max(0, IDS.indexOf(c.sprite));
           $('cname').value = c.name;
