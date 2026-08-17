@@ -621,25 +621,25 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         z = nz;
         apply();
       };
-      // "fit" = exakt die start-kamera: fester 98%-zoom, horizontal zentriert,
-      // oben bündig. fenster, die unten rausragen (info, tiefe jahresstapel),
-      // werden bewusst ignoriert — nur minX/maxX/minY zählen
+      // "fit" = exakt die start-kamera: 98%-zoom (auf schmaleren bildschirmen
+      // automatisch kleiner, bis die volle breite reinpasst), horizontal
+      // zentriert, oben bündig. fenster, die unten rausragen (info, tiefe
+      // jahresstapel), werden bewusst ignoriert — nur minX/maxX/minY zählen
       const fit = () => {
         const wins = [...document.querySelectorAll('.win')].filter(
           (w) => !w.classList.contains('hidden') && w.id !== 'win-info'
         );
         if (!wins.length) return;
-        z = 0.98;
         const minX = Math.min(...wins.map((w) => w.offsetLeft));
         const minY = Math.min(...wins.map((w) => w.offsetTop));
         const maxX = Math.max(...wins.map((w) => w.offsetLeft + w.offsetWidth));
         const r = vp.getBoundingClientRect();
-        const cw = (maxX - minX) * z;
-        // passt der inhalt nicht rein: links bündig statt mittig anschneiden
-        px = cw + 80 <= r.width ? (r.width - cw) / 2 - minX * z : -(minX - 40) * z;
-        // das fixe you-fenster links braucht platz — inhalt nie darunter starten
+        // das fixe you-fenster links braucht platz — inhalt nie darunter
         const cwr = $('charwin');
-        if (cwr && !cwr.classList.contains('hidden')) px = Math.max(px, 240 - minX * z);
+        const reserve = cwr && !cwr.classList.contains('hidden') && getComputedStyle(cwr).display !== 'none' ? 240 : 40;
+        z = Math.min(0.98, Math.max(0.45, (r.width - reserve - 40) / (maxX - minX)));
+        const cw = (maxX - minX) * z;
+        px = Math.max((r.width - cw) / 2 - minX * z, reserve - minX * z);
         py = -(minY - 40) * z;
         apply();
       };
