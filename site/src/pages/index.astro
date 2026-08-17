@@ -3,7 +3,7 @@
 // root-fenster ist die schaltzentrale: jahres-fenster + character-creator
 // lassen sich dort an-/abschalten. viewer + about sind resizable.
 // canvas-, fenster- und kabelfarbe einzeln einstellbar (localStorage).
-import { SITE, works, years, worksByYear, featuredWorks, animations, url, GOATCOUNTER, OG_IMAGE } from '../data/site.js';
+import { SITE, works, years, worksByYear, featuredWorks, animations, url, GOATCOUNTER, OG_IMAGE, REGISTRY } from '../data/site.js';
 import store from '../data/store.json';
 
 const workBySlug = Object.fromEntries(works.map((w) => [w.slug, w]));
@@ -113,6 +113,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
             <button class="trow" data-win="win-store">├── <span class="ind">[ ]</span> store/ <span class="dim">[soon]</span></button>
             <button class="trow" data-win="win-activity">├── <span class="ind">[ ]</span> activity.log</button>
+            <button class="trow" data-win="win-book">├── <span class="ind">[ ]</span> residents.log</button>
             <pre class="tree">│</pre>
           </div>
           <pre class="tree" set:html={bottomTree} />
@@ -205,7 +206,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <pre id="genlog" class="small dim">ready. model: mpw-diffusion-v0.8 (local)</pre>
         </div>
 
-        <div class="win togglable hidden resizable" id="win-store" style="left:2040px; top:700px; width:330px">
+        <div class="win alt togglable hidden" id="win-book" style="left:2040px; top:640px; width:300px" data-reg={REGISTRY} data-spritebase={url('/sprites/')}>
+          <div class="win-title"><span class="sq y"></span><span class="sq b"></span> ▒▓ residents.log ░</div>
+          <div class="small dim" id="bookline">opening the ledger…</div>
+          <div id="bookscroll"></div>
+        </div>
+
+        <div class="win togglable hidden resizable" id="win-store" style="left:2040px; top:1200px; width:330px">
           <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓░ store/ ▒░▓</div>
           {storeItems.map((it) => (
             <div class="stitem">
@@ -508,6 +515,14 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #charimg.gen-4 { transform: scaleX(-1); filter: invert(1); }
       @media (max-width: 1100px) { #charwin { display: none; } }
 
+      /* residents.log — gästebuch aller charaktere */
+      #bookscroll { max-height: 420px; overflow-y: auto; margin-top: 6px; }
+      .bkrow { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-top: 2px dashed rgba(0, 0, 0, 0.2); }
+      .bkrow:first-child { border-top: none; }
+      .bkrow img { width: 44px; height: 44px; border: 2px solid var(--border); background: #efe9d8; image-rendering: pixelated; flex-shrink: 0; }
+      .bkinfo { min-width: 0; }
+      .bkname { font-size: 16px; overflow-wrap: anywhere; }
+
       /* archive activity */
       #actgraph { display: block; margin-bottom: 6px; }
       #actgraph rect { stroke: var(--border); stroke-width: 1.5; }
@@ -721,7 +736,42 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         });
         prefs.open = openState;
         savePrefs();
+        if (openState['win-book']) loadBook();
         drawCables();
+      }
+
+      // ---------- residents.log: gästebuch aller charaktere ----------
+      // lädt beim ersten öffnen des fensters; namen sind user-input und
+      // werden escaped, bevor sie ins dom gehen
+      const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      let bookLoaded = false;
+      async function loadBook() {
+        if (bookLoaded) return;
+        bookLoaded = true;
+        const box = $('win-book');
+        const reg = box.dataset.reg;
+        if (!reg) { $('bookline').textContent = 'local mode — no shared registry.'; return; }
+        try {
+          const j = await (await fetch(reg + '/book')).json();
+          if (!j.residents || !j.residents.length) {
+            $('bookline').textContent = 'no residents yet. the first one matters.';
+            return;
+          }
+          $('bookline').textContent = `${j.residents.length} resident${j.residents.length === 1 ? '' : 's'} · newest first`;
+          $('bookscroll').innerHTML = j.residents.map((c) => `
+            <div class="bkrow">
+              <img class="gen-${((Number(c.gen) - 1) % 4) + 1}" src="${box.dataset.spritebase}${esc(c.sprite)}.webp" alt="" loading="lazy" width="44" height="44" />
+              <div class="bkinfo">
+                <div class="bkname">${esc(c.name)}</div>
+                <div class="small dim">${esc(c.klass || '—')}</div>
+                <div class="small dim">#${Number(c.num)} · gen ${Number(c.gen)} · ${esc(String(c.created).slice(0, 10))}</div>
+              </div>
+            </div>`).join('');
+          drawCables();
+        } catch {
+          bookLoaded = false;
+          $('bookline').textContent = 'registry unreachable — try again later.';
+        }
       }
       document.querySelectorAll('.trow[data-win]').forEach((b) =>
         b.addEventListener('click', () => {
@@ -741,6 +791,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
         ['win-root', 'win-store'], ['win-store', 'win-info'],
         ['win-viewer', 'win-activity'],
+        ['win-root', 'win-book'],
       ];
       const CABLE_SETS = {
         __mix: ['#e0473b', '#e8c84d', '#57c94f', '#4a90d9'],

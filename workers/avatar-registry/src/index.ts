@@ -8,6 +8,7 @@
 //                            201 { num, gen, sprite, name, token, created }
 //                            409 { error: "sprite_taken" | "name_taken" }
 //   GET  /me?token=...    -> gespeicherter charakter oder 404
+//   GET  /book            -> alle charaktere, öffentliche felder, neueste zuerst
 //   POST /repair          -> body { token, stats?, klass? }
 //                            trägt NUR fehlende attribute/klasse nach
 //                            (für alte claims ohne stats) — nie überschreiben
@@ -139,6 +140,22 @@ export class Registry {
         ['token:' + token]: character,
       });
       return json({ ...character, token }, 201);
+    }
+
+    if (url.pathname === '/book') {
+      // öffentliches gästebuch: nur unkritische felder — nie tokens/stats
+      const map = await storage.list<Character>({ prefix: 'token:' });
+      const residents = [...map.values()]
+        .map((c) => ({
+          num: c.num,
+          gen: c.gen,
+          sprite: c.sprite,
+          name: c.name,
+          klass: c.klass ?? null,
+          created: c.created,
+        }))
+        .sort((a, b) => b.num - a.num);
+      return json({ count: residents.length, residents });
     }
 
     if (url.pathname === '/repair' && req.method === 'POST') {
