@@ -63,7 +63,7 @@ import sprites from '../../data/sprites.json';
         <button id="create">CREATE CHARACTER</button>
         <p class="small" id="err" hidden></p>
         <p class="dim small" id="saved" hidden>
-          saved. <a id="dl" download="character.txt" href="#">download character.txt</a> ·
+          <span id="savedlbl">saved.</span> <a id="dl" download="character.txt" href="#">download character.txt</a> ·
           <a href={url('/')}>return to the archive →</a>
         </p>
         <p class="dim small" id="restore-line">
@@ -279,6 +279,11 @@ import sprites from '../../data/sprites.json';
           : Object.fromEntries(STATS.map((s) => [s, 1]));
       if (saved?.name) $('cname').value = saved.name;
 
+      // existiert bereits ein charakter, wird die seite zur akte:
+      // nichts ist mehr veränderbar (entscheidung auf lebenszeit), aber
+      // export (character.txt) und restore bleiben immer erreichbar
+      const locked = !!saved;
+
       // generation-optik: gen 2 gespiegelt, gen 3 invertiert, gen 4 beides —
       // danach beginnt der zyklus von vorn (die kopie der kopie der kopie)
       const genClass = (g) => 'gen-' + (((g - 1) % 4) + 1);
@@ -299,7 +304,7 @@ import sprites from '../../data/sprites.json';
           gen = s.gen;
           taken = new Set(s.taken);
           $('regline').textContent = `generation ${s.gen} · ${s.remaining} of ${IDS.length} sprites remain · every character exists once`;
-          $('sprite').className = genClass(gen);
+          if (!locked) $('sprite').className = genClass(gen);
           if (taken.has(IDS[spriteIdx]) && !saved) {
             spriteIdx = randomFree();
             render();
@@ -326,13 +331,15 @@ import sprites from '../../data/sprites.json';
         $('sprite').src = BASE + IDS[spriteIdx] + '.webp';
         $('spriteno').textContent = `sprite #${IDS[spriteIdx]} / ${IDS.length}`;
         const free = POOL - spent();
-        $('pool').textContent = free === 0 ? 'all points assigned' : `${free} point${free === 1 ? '' : 's'} unassigned`;
+        $('pool').textContent = locked
+          ? 'assigned. for life.'
+          : free === 0 ? 'all points assigned' : `${free} point${free === 1 ? '' : 's'} unassigned`;
         $('statrows').innerHTML = STATS.map((s) => `
           <div class="statrow">
             <span class="sname">${s}</span>
-            <button data-s="${s}" data-d="-1" ${stats[s] <= 1 ? 'disabled' : ''}>−</button>
+            <button data-s="${s}" data-d="-1" ${locked || stats[s] <= 1 ? 'disabled' : ''}>−</button>
             <span class="bar">${'▮'.repeat(stats[s])}${'▯'.repeat(MAX - stats[s])}</span>
-            <button data-s="${s}" data-d="1" ${stats[s] >= MAX || free <= 0 ? 'disabled' : ''}>+</button>
+            <button data-s="${s}" data-d="1" ${locked || stats[s] >= MAX || free <= 0 ? 'disabled' : ''}>+</button>
           </div>`).join('');
         const [name, desc] = classOf();
         $('cclass').textContent = name;
@@ -340,6 +347,7 @@ import sprites from '../../data/sprites.json';
       }
 
       $('statrows').addEventListener('click', (e) => {
+        if (locked) return;
         const b = e.target.closest('button[data-s]');
         if (!b || b.disabled) return;
         stats[b.dataset.s] += Number(b.dataset.d);
@@ -358,7 +366,7 @@ import sprites from '../../data/sprites.json';
       };
       let rolling = false;
       $('reroll').addEventListener('click', () => {
-        if (rolling) return;
+        if (rolling || locked) return;
         rolling = true;
         let t = 0;
         const iv = setInterval(() => {
@@ -407,6 +415,7 @@ import sprites from '../../data/sprites.json';
       });
 
       $('create').addEventListener('click', async () => {
+        if (locked) return;
         const name = $('cname').value.trim();
         // pflichtfelder: ohne name und ohne volle punkteverteilung kein charakter
         let blocked = false;
@@ -492,11 +501,27 @@ import sprites from '../../data/sprites.json';
           spriteIdx = Math.max(0, IDS.indexOf(c.sprite));
           $('cname').value = c.name;
           render();
+          // vollständig wiederhergestellt: seite neu laden -> gesperrte akte
+          if (hasAll(c.stats)) location.reload();
         } catch {
           showErr('registry unreachable. try again later.');
         }
       });
 
+      if (locked) {
+        // die akte: alles sichtbar, nichts veränderbar — nur export + restore
+        document.querySelector('#creator .win-title').innerHTML =
+          '<span class="sq r"></span><span class="sq b"></span> ▓▒ character.cfg ░▓';
+        document.querySelector('.opener').textContent =
+          'the archive already remembers you. this was a decision for life.';
+        $('cname').disabled = true;
+        $('reroll').hidden = true;
+        // style statt hidden-attribut: #create hat display:block im css
+        $('create').style.display = 'none';
+        if (saved.gen) $('sprite').className = genClass(saved.gen);
+        $('savedlbl').textContent = 'this character is on file.';
+        persist(saved); // baut den download-link und blendet die zeile ein
+      }
       render();
       loadRegistry();
     </script>

@@ -15,6 +15,8 @@ const storeItems = store.items.map((it) => ({
 const yearsDesc = [...years].reverse();
 // versteckte animationen (z. b. reality) tauchen nirgends auf — auch nicht bei rnd
 const visibleAnims = animations.filter((a) => !a.hidden);
+// proxy läuft als normales 2026-werk mit — kein eigener baum-eintrag, kein fenster
+const treeAnims = visibleAnims.filter((a) => a.slug !== 'proxy');
 // animationen zählen zu ihrem jahr dazu (einmal — keine dubletten)
 const byYearAll = (y) => [...worksByYear(y), ...visibleAnims.filter((a) => a.year === y)];
 const yearData = yearsDesc.map((y) => ({ year: y, works: byYearAll(y) }));
@@ -98,13 +100,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             ))}
             <pre class="tree">│</pre>
             <pre class="tree">├── ai-animations/</pre>
-            {visibleAnims.map((a, i) =>
-              a.slug === 'proxy' ? (
-                <button class="trow" data-win="win-proxy">│   {i === visibleAnims.length - 1 ? '└──' : '├──'} <span class="ind">[ ]</span> {a.title} <span class="dim">({a.year})</span></button>
-              ) : (
-                <button class="animrow trow" data-anim={a.slug}>│   {i === visibleAnims.length - 1 ? '└──' : '├──'} <span class="ind">▶</span> {a.title} <span class="dim">({a.year})</span></button>
-              )
-            )}
+            {treeAnims.map((a, i) => (
+              <button class="animrow trow" data-anim={a.slug}>│   {i === treeAnims.length - 1 ? '└──' : '├──'} <span class="ind">▶</span> {a.title} <span class="dim">({a.year})</span></button>
+            ))}
             <pre class="tree">│</pre>
             <button class="trow" data-win="win-cc">├── <span class="ind">[ ]</span> character-creator/</button>
             <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
@@ -225,14 +223,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div class="win alt togglable hidden" id="win-proxy" style="left:2160px; top:80px; width:330px">
-          <div class="win-title"><span class="sq b"></span><span class="sq r"></span> ▒▓ proxy.param ░</div>
-          <img class="proxyimg" src={animations.find((a) => a.slug === 'proxy')?.image} alt="proxy — animation, 2026" loading="lazy" />
-          <pre class="small dim">signal: live · 76 frames · loop
-proxy, 2026 — the artwork as
-an abstract parameter.</pre>
-        </div>
-
         <div class="win alt togglable" id="win-activity" style="left:1830px; top:80px; width:300px" data-gc={GOATCOUNTER}>
           <div class="win-title"><span class="sq y"></span> ▒ archive activity ░▓</div>
           <svg id="actgraph" viewBox="0 0 280 56" width="100%" aria-hidden="true"></svg>
@@ -289,6 +279,7 @@ an abstract parameter.</pre>
       <div id="charstats"></div>
       <hr class="chr" />
       <div id="charno" class="small dim"></div>
+      <a class="small" id="charsave" href="#" download="character.txt">save character.txt ↓</a>
       <div class="small dim charfoot">the archive remembers you.</div>
     </div>
 
@@ -511,11 +502,6 @@ an abstract parameter.</pre>
       #charimg.gen-3 { filter: invert(1); }
       #charimg.gen-4 { transform: scaleX(-1); filter: invert(1); }
       @media (max-width: 1100px) { #charwin { display: none; } }
-      .proxyimg {
-        display: block; width: 100%; height: auto;
-        border: 2px solid var(--border); background: #efe9d8;
-        box-shadow: 3px 3px 0 var(--shadow); margin-bottom: 6px;
-      }
 
       /* archive activity */
       #actgraph { display: block; margin-bottom: 6px; }
@@ -733,7 +719,6 @@ an abstract parameter.</pre>
         ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
         ['win-root', 'win-store'], ['win-store', 'win-info'],
         ['win-viewer', 'win-activity'], ['win-activity', 'win-settings'],
-        ['win-viewer', 'win-proxy'],
       ];
       const CABLE_SETS = {
         __mix: ['#e0473b', '#e8c84d', '#57c94f', '#4a90d9'],
@@ -1016,6 +1001,25 @@ an abstract parameter.</pre>
             (s) => `<div class="csrow"><span>${s}</span><span class="csbar">${'▮'.repeat(c.stats[s])}${'▯'.repeat(5 - c.stats[s])}</span></div>`
           ).join('');
         }
+
+        // export: die character.txt ist jederzeit neu erzeugbar — gleiche
+        // form wie beim erstellen, direkt aus dem lokalen speicher
+        const lines = [
+          '== moepwellington.xyz — character file ==',
+          `name:      ${c.name}`,
+          `class:     ${c.klass}`,
+          `sprite:    #${c.sprite} / 266`,
+          c.num ? `character: #${c.num} · generation ${c.gen}` : 'mode:      local',
+          c.stats && CSTATS.every((s) => s in c.stats)
+            ? `stats:     ${CSTATS.map((s) => `${s} ${c.stats[s]}`).join(' · ')}`
+            : null,
+          `created:   ${c.created}`,
+          '',
+          c.token
+            ? `recovery token (keep this — it is the only proof this character is yours):\n${c.token}`
+            : 'no token — local character, lives in this browser only.',
+        ].filter((l) => l !== null).join('\n');
+        $('charsave').href = URL.createObjectURL(new Blob([lines], { type: 'text/plain' }));
         // creator-fenster dauerhaft aus; zeile im root wird zum toggle
         openState['win-cc'] = false;
         const ccRow = document.querySelector('.trow[data-win="win-cc"]');
