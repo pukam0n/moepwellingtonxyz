@@ -233,7 +233,7 @@ proxy, 2026 — the artwork as
 an abstract parameter.</pre>
         </div>
 
-        <div class="win alt togglable" id="win-activity" style="left:1820px; top:80px; width:300px" data-gc={GOATCOUNTER}>
+        <div class="win alt togglable" id="win-activity" style="left:1830px; top:80px; width:300px" data-gc={GOATCOUNTER}>
           <div class="win-title"><span class="sq y"></span> ▒ archive activity ░▓</div>
           <svg id="actgraph" viewBox="0 0 280 56" width="100%" aria-hidden="true"></svg>
           <div class="small" id="actline">measuring…</div>
@@ -282,7 +282,7 @@ an abstract parameter.</pre>
     <!-- gelocktes charakter-fenster: fix in der ecke, unabhängig von der kamera -->
     <div id="charwin" class="hidden" data-spritebase={url('/sprites/')} data-href={url('/character-creator/')}>
       <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▒▓ you ░▒</div>
-      <img id="charimg" alt="your character" width="256" height="256" title="edit character" />
+      <img id="charimg" alt="your character" width="256" height="256" />
       <div id="charname"></div>
       <div id="charclass" class="small dim"></div>
       <hr class="chr" />
@@ -499,7 +499,7 @@ an abstract parameter.</pre>
       #charimg {
         display: block; width: 100%; height: auto;
         border: 2px solid var(--border); background: #efe9d8;
-        image-rendering: pixelated; margin-bottom: 6px; cursor: pointer;
+        image-rendering: pixelated; margin-bottom: 6px;
       }
       #charname { font-size: 19px; letter-spacing: 1px; overflow-wrap: anywhere; }
       #charwin .chr { border: none; border-top: 2px dashed rgba(0, 0, 0, 0.25); margin: 7px 0; }
@@ -791,7 +791,8 @@ an abstract parameter.</pre>
       }
 
       // ---------- viewer ----------
-      let selection = DATA.featured, srcLabel = 'selected-works', page = 0, slots = 1;
+      // start: das aktuelle jahr (2026) komplett, nicht die selected works
+      let selection = DATA.byYear['2026'] || DATA.featured, srcLabel = '2026', page = 0, slots = 1;
       function renderViewer() {
         const el = $('vslots');
         el.dataset.slots = slots;
@@ -1015,8 +1016,6 @@ an abstract parameter.</pre>
             (s) => `<div class="csrow"><span>${s}</span><span class="csbar">${'▮'.repeat(c.stats[s])}${'▯'.repeat(5 - c.stats[s])}</span></div>`
           ).join('');
         }
-        $('charimg').addEventListener('click', () => (location.href = box.dataset.href));
-
         // creator-fenster dauerhaft aus; zeile im root wird zum toggle
         openState['win-cc'] = false;
         const ccRow = document.querySelector('.trow[data-win="win-cc"]');
