@@ -67,6 +67,52 @@ type Character = {
 const json = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { 'content-type': 'application/json' } });
 
+// ---- attribute & klassen: server ist die einzige wahrheit ----
+// spiegel der creator-logik (character-creator/index.astro) — klasse wird
+// IMMER aus den stats abgeleitet, client-angaben werden ignoriert.
+// stats sind nur gültig als exakt 5 werte 1..5 mit summe 15 (10 punkte + basis)
+const STAT_KEYS = ['literacy', 'bandwidth', 'provenance', 'friction', 'patience'] as const;
+type Stats = Record<(typeof STAT_KEYS)[number], number>;
+
+function validStats(x: unknown): Stats | null {
+  if (!x || typeof x !== 'object') return null;
+  const out = {} as Stats;
+  let sum = 0;
+  for (const k of STAT_KEYS) {
+    const v = Number((x as Record<string, unknown>)[k]);
+    if (!Number.isInteger(v) || v < 1 || v > 5) return null;
+    out[k] = v;
+    sum += v;
+  }
+  return sum === 15 ? out : null;
+}
+
+const PAIR_CLASSES: Record<string, Record<string, string>> = {
+  literacy: { bandwidth: 'the footnote maximalist', provenance: 'the meme historian', friction: 'the institutional critic', patience: 'the slow critic' },
+  bandwidth: { literacy: 'the dataset scavenger', provenance: 'the contamination archivist', friction: 'the glitch auteur', patience: 'the render hermit' },
+  provenance: { literacy: 'the forensic curator', bandwidth: 'the rights-holder', friction: 'the claimant', patience: 'the conservator' },
+  friction: { literacy: 'the poor-image theologian', bandwidth: 'the compression ascetic', provenance: 'the material witness', patience: 'the craft fundamentalist' },
+  patience: { literacy: 'the auteurist', bandwidth: 'the slop auteur', provenance: 'the labor romantic', friction: 'the director' },
+};
+const SPECIALS: Array<[(s: Stats) => boolean, string]> = [
+  [(s) => s.literacy === 5 && s.friction === 5, 'the adversarial user'],
+  [(s) => s.friction === 5 && s.bandwidth === 1, 'the refuser'],
+  [(s) => s.bandwidth === 5 && s.provenance === 1, 'the middleman'],
+  [(s) => s.patience === 5 && s.literacy === 1, 'the sleeper'],
+  [(s) => s.provenance === 1 && s.literacy >= 4, 'the revisionist'],
+  [(s) => s.bandwidth >= 4 && s.friction === 1, 'the normie'],
+  [(s) => STAT_KEYS.every((k) => s[k] >= 2 && s[k] <= 4) && STAT_KEYS.filter((k) => s[k] === 4).length <= 1, 'the model citizen'],
+];
+
+function classOf(s: Stats): string {
+  if (STAT_KEYS.every((k) => s[k] === 3)) return 'the reproduction';
+  for (const [test, name] of SPECIALS) if (test(s)) return name;
+  const order = [...STAT_KEYS].sort(
+    (a, b) => s[b] - s[a] || STAT_KEYS.indexOf(a) - STAT_KEYS.indexOf(b)
+  );
+  return PAIR_CLASSES[order[0]][order[1]];
+}
+
 export class Registry {
   state: DurableObjectState;
 
@@ -97,16 +143,12 @@ export class Registry {
       }
       const sprite = String(body.sprite ?? '');
       const name = String(body.name ?? '').trim();
-      // stats/klasse: locker validiert, rein informativ (für restore)
-      const stats =
-        body.stats && typeof body.stats === 'object'
-          ? Object.fromEntries(
-              Object.entries(body.stats)
-                .slice(0, 8)
-                .map(([k, v]) => [String(k).slice(0, 24), Math.max(0, Math.min(9, Number(v) || 0))])
-            )
-          : undefined;
-      const klass = body.klass ? String(body.klass).slice(0, 64) : undefined;
+      // stats streng validieren (1..5, summe 15); klasse wird NICHT vom
+      // client übernommen, sondern deterministisch abgeleitet — schummeln
+      // per manipuliertem request ist damit zwecklos
+      const stats = validStats(body.stats) ?? undefined;
+      if (body.stats && !stats) return json({ error: 'bad_stats' }, 400);
+      const klass = stats ? classOf(stats) : undefined;
       if (!/^\d{3}$/.test(sprite) || Number(sprite) >= SPRITE_COUNT) {
         return json({ error: 'bad_sprite' }, 400);
       }
@@ -143,7 +185,7 @@ export class Registry {
     }
 
     if (url.pathname === '/book') {
-      // öffentliches gästebuch: nur unkritische felder — nie tokens/stats
+      // öffentliches gästebuch: profil-felder inkl. stats — nie tokens
       const map = await storage.list<Character>({ prefix: 'token:' });
       const residents = [...map.values()]
         .map((c) => ({
@@ -152,6 +194,7 @@ export class Registry {
           sprite: c.sprite,
           name: c.name,
           klass: c.klass ?? null,
+          stats: validStats(c.stats) ?? null,
           created: c.created,
         }))
         .sort((a, b) => b.num - a.num);
@@ -172,16 +215,16 @@ export class Registry {
       const character = await storage.get<Character>(key);
       if (!character) return json({ error: 'not_found' }, 404);
       let changed = false;
-      if (!character.stats && body.stats && typeof body.stats === 'object') {
-        character.stats = Object.fromEntries(
-          Object.entries(body.stats)
-            .slice(0, 8)
-            .map(([k, v]) => [String(k).slice(0, 24), Math.max(0, Math.min(9, Number(v) || 0))])
-        );
+      if (!validStats(character.stats)) {
+        // nur wenn (gültige) stats fehlen: streng validiert nachtragen
+        const stats = validStats(body.stats);
+        if (!stats) return json({ error: 'bad_stats' }, 400);
+        character.stats = stats;
+        character.klass = classOf(stats);
         changed = true;
-      }
-      if (!character.klass && body.klass) {
-        character.klass = String(body.klass).slice(0, 64);
+      } else if (!character.klass) {
+        // stats vorhanden, klasse fehlt: deterministisch nachziehen
+        character.klass = classOf(character.stats as Stats);
         changed = true;
       }
       if (changed) await storage.put(key, character);
