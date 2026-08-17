@@ -134,7 +134,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           </div>
         ))}
 
-        <div class="win resizable" id="win-viewer" style="left:800px; top:75px; width:680px">
+        <div class="win resizable" id="win-viewer" style="left:800px; top:75px; width:790px">
           <div class="win-title"><span class="sq r"></span><span class="sq b"></span> ▓░ VIEWER ── selected-works ░▒▓ <span class="sq y"></span></div>
           <div class="vbar">
             <span class="dim small">windows:</span>
@@ -159,29 +159,37 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         <div class="win alt resizable" id="win-about" style="left:70px; top:825px; width:340px">
           <div class="win-title"><span class="sq y"></span> ▓ about ▒░</div>
           <p class="small">
-            i'm moe p. wellington, a 31-year-old artist from germany. since early
-            2022, i've been experimenting with ai-assisted image-making in
-            different forms.
+            i'm moe p. wellington, a 31-year-old artist from germany. since
+            2022, i've been experimenting with AI.
           </p>
           <p class="small">
-            the recent work begins with a contradiction: the interface is a system
-            designed for human comprehension, while the model encounters it
-            without use, intention or literacy.
+            my work explores the paradox between UI and AI: interfaces are
+            systems designed to be read and understood by humans, yet i ask
+            artificial models to reconstruct their visual language without
+            access to the logic, intention, or literacy those interfaces were
+            built to communicate.
           </p>
           <p class="small">
-            i ask machines to reconstruct the visual language of operation without
-            access to the logic it was built to communicate. what remains is a
-            kind of false memory of software. worlds that seem navigable but
-            refuse to explain themselves. i'm interested in the sensation of
-            encountering games as a child, before their symbols had settled into
-            meaning. information before literacy. systems before understanding.
-            <em>the work of art in the age of artificial reproduction.</em>
+            what emerges is a kind of false memory of software. worlds that
+            appear functional and navigable, but refuse to fully explain
+            themselves.
           </p>
+          <p class="small">
+            i'm interested in the sensation of encountering videogames as a
+            child, before their symbols had settled into meaning: when something
+            could feel familiar and operational long before i understood how to
+            read it.
+          </p>
+          <p class="small">
+            i use AI because it recreates that same feeling: a system that seems
+            to work, but begins to fall apart the closer you look.
+          </p>
+          <p class="small">information before literacy. systems before understanding.</p>
           <a class="small" href={url('/about/')}>statement + socials →</a>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div class="win" id="win-info" style="left:70px; top:1280px; width:280px">
+        <div class="win" id="win-info" style="left:70px; top:1560px; width:280px">
           <div class="win-title"><span class="sq r"></span> ░ info ▒▒</div>
           <p class="small"><a href={url('/info/impressum/')}>impressum</a> · <a href={url('/info/datenschutz/')}>datenschutz</a></p>
           <p class="dim small">© 2022–2026 moe p. wellington</p>
@@ -195,7 +203,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <pre id="genlog" class="small dim">ready. model: mpw-diffusion-v0.8 (local)</pre>
         </div>
 
-        <div class="win togglable hidden resizable" id="win-store" style="left:1630px; top:700px; width:330px">
+        <div class="win togglable hidden resizable" id="win-store" style="left:1640px; top:700px; width:330px">
           <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓░ store/ ▒░▓</div>
           {storeItems.map((it) => (
             <div class="stitem">
@@ -236,9 +244,9 @@ an abstract parameter.</pre>
           <div class="win-title"><span class="sq b"></span><span class="sq y"></span> ▒▓ settings.cfg ░</div>
           <div class="small">canvas:</div>
           <div class="swrow" id="bgswatches">
-            <button class="swatch" data-v="" title="default blue" style="background:#1e56b0"></button>
+            <button class="swatch" data-v="" title="graphite (default)" style="background:#242424"></button>
             <button class="swatch" data-v="#1a1a1a" title="comfy black" style="background:#1a1a1a"></button>
-            <button class="swatch" data-v="#242424" title="graphite" style="background:#242424"></button>
+            <button class="swatch" data-v="#1e56b0" title="blue" style="background:#1e56b0"></button>
             <button class="swatch" data-v="#0d1b3e" title="deep navy" style="background:#0d1b3e"></button>
             <button class="swatch" data-v="#008080" title="win teal" style="background:#008080"></button>
             <button class="swatch" data-v="#0d2626" title="dark teal" style="background:#0d2626"></button>
@@ -246,20 +254,20 @@ an abstract parameter.</pre>
           </div>
           <div class="small">windows:</div>
           <div class="swrow" id="winswatches">
-            <button class="swatch" data-v="" title="mixed (yellow + grey)" style="background:linear-gradient(135deg,#d9cd4e 0 50%,#e9e4cf 50%)"></button>
+            <button class="swatch" data-v="" title="grey (default)" style="background:#b9bdb2"></button>
+            <button class="swatch" data-v="__mix" title="mixed (yellow + grey)" style="background:linear-gradient(135deg,#d9cd4e 0 50%,#e9e4cf 50%)"></button>
             <button class="swatch" data-v="#d9cd4e" title="yellow" style="background:#d9cd4e"></button>
             <button class="swatch" data-v="#e9e4cf" title="grey/cream" style="background:#e9e4cf"></button>
-            <button class="swatch" data-v="#b9bdb2" title="grey" style="background:#b9bdb2"></button>
             <button class="swatch" data-v="#d9a441" title="ocker" style="background:#d9a441"></button>
             <button class="swatch" data-v="#f4f2ec" title="paper" style="background:#f4f2ec"></button>
           </div>
           <div class="small">cables:</div>
           <div class="swrow" id="cableswatches">
-            <button class="swatch" data-v="" title="default blue" style="background:#1233c8"></button>
+            <button class="swatch" data-v="" title="yellow (default)" style="background:#ffe94d"></button>
+            <button class="swatch" data-v="#1233c8" title="blue" style="background:#1233c8"></button>
             <button class="swatch" data-v="#4a90d9" title="light blue" style="background:#4a90d9"></button>
             <button class="swatch" data-v="#c81111" title="red" style="background:#c81111"></button>
             <button class="swatch" data-v="#57c94f" title="green" style="background:#57c94f"></button>
-            <button class="swatch" data-v="#ffe94d" title="yellow" style="background:#ffe94d"></button>
             <button class="swatch" data-v="#e8e6de" title="white" style="background:#e8e6de"></button>
             <button class="swatch" data-v="#0a0a0a" title="black" style="background:#0a0a0a"></button>
             <button class="swatch" data-v="__mix" title="mixed" style="background:linear-gradient(135deg,#e0473b 0 25%,#e8c84d 25% 50%,#57c94f 50% 75%,#4a90d9 75%)"></button>
@@ -313,12 +321,12 @@ an abstract parameter.</pre>
         font-display: swap;
       }
       :root {
-        --bg: #1e56b0;
-        --win: #d9cd4e;
-        --win-alt: #e9e4cf;
-        --cable: #1233c8;
+        --bg: #242424;
+        --win: #b9bdb2;
+        --win-alt: #b9bdb2;
+        --cable: #ffe94d;
         --border: #101010;
-        --shadow: #071c4a;
+        --shadow: #0d0d0d;
         --text: #262104;
         --yb: #ffe94d;
         --tb: #c9c9c9;
@@ -407,7 +415,6 @@ an abstract parameter.</pre>
         padding: 10px 12px 12px;
       }
       .win.alt { background-color: var(--win-alt); }
-      body.uniwin .win, body.uniwin .win.alt { background-color: var(--win); }
       .win::before, .win::after {
         content: ""; position: absolute; width: 9px; height: 9px;
         background: var(--cable); border: 2px solid var(--border); top: 18px; z-index: 3;
@@ -748,11 +755,14 @@ an abstract parameter.</pre>
           const color = mixSet ? mixSet[ci++ % mixSet.length] : single;
           let d, x1, y1, x2, y2;
           if (mode === 'left') {
-            // andersherum: links raus, bogen nach außen, links wieder rein
+            // andersherum: links raus, bogen nach außen, links wieder rein.
+            // tangenten an beiden enden horizontal — das kabel verlässt und
+            // trifft die fenster sauber seitlich statt schräg zu schwingen
             x1 = A.offsetLeft; y1 = A.offsetTop + 22;
             x2 = B.offsetLeft; y2 = B.offsetTop + 22;
-            const bulge = 120;
-            d = `M${x1} ${y1} C${x1 - bulge} ${y1 + 50}, ${x2 - bulge} ${y2 - 50}, ${x2} ${y2}`;
+            const dist = Math.hypot(x2 - x1, y2 - y1);
+            const bulge = Math.min(60 + dist * 0.22, 200);
+            d = `M${x1} ${y1} C${x1 - bulge} ${y1}, ${x2 - bulge} ${y2}, ${x2} ${y2}`;
           } else {
             const leftFirst = A.offsetLeft + A.offsetWidth / 2 <= B.offsetLeft + B.offsetWidth / 2;
             x1 = leftFirst ? A.offsetLeft + A.offsetWidth : A.offsetLeft;
@@ -1038,12 +1048,15 @@ an abstract parameter.</pre>
         prefs.bg ? root.setProperty('--bg', prefs.bg) : root.removeProperty('--bg');
         const cableCss = CABLE_SETS[prefs.cable] ? CABLE_SETS[prefs.cable][0] : prefs.cable;
         cableCss ? root.setProperty('--cable', cableCss) : root.removeProperty('--cable');
-        if (prefs.win) {
+        if (prefs.win === '__mix') {
+          root.setProperty('--win', '#d9cd4e');
+          root.setProperty('--win-alt', '#e9e4cf');
+        } else if (prefs.win) {
           root.setProperty('--win', prefs.win);
-          document.body.classList.add('uniwin');
+          root.setProperty('--win-alt', prefs.win);
         } else {
           root.removeProperty('--win');
-          document.body.classList.remove('uniwin');
+          root.removeProperty('--win-alt');
         }
         for (const [rowId, key] of [['bgswatches', 'bg'], ['winswatches', 'win'], ['cableswatches', 'cable']]) {
           $(rowId).querySelectorAll('.swatch').forEach((s) => s.classList.toggle('on', (prefs[key] || '') === s.dataset.v));
@@ -1065,10 +1078,28 @@ an abstract parameter.</pre>
       };
 
       // ---------- start ----------
+      // startkamera: fester zoom statt fit — horizontal zentriert, oben
+      // bündig. info-fenster hängt bewusst unten raus und zählt nicht mit.
+      const home = () => {
+        const wins = [...document.querySelectorAll('.win')].filter(
+          (w) => !w.classList.contains('hidden') && w.id !== 'win-info'
+        );
+        if (!wins.length) return;
+        z = 0.96;
+        const minX = Math.min(...wins.map((w) => w.offsetLeft));
+        const minY = Math.min(...wins.map((w) => w.offsetTop));
+        const maxX = Math.max(...wins.map((w) => w.offsetLeft + w.offsetWidth));
+        const r = vp.getBoundingClientRect();
+        const cw = (maxX - minX) * z;
+        // passt der inhalt nicht rein: links bündig statt mittig anschneiden
+        px = cw + 80 <= r.width ? (r.width - cw) / 2 - minX * z : -(minX - 40) * z;
+        py = -(minY - 40) * z;
+        apply();
+      };
       applyPrefs();
       applyOpen();
       renderViewer();
-      if (isWide()) fit();
+      if (isWide()) home();
       window.addEventListener('resize', drawCables);
 
       // permalink: /#werk-slug lädt das jahr des werks und öffnet es im fullscreen
