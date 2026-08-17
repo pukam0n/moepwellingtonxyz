@@ -941,16 +941,24 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           d.setDate(d.getDate() - i);
           dayKeys.push(d.toISOString().slice(0, 10));
         }
+        // goatcounters counter-endpoint hat ein rate-limit (~4 req/s) —
+        // die tage daher NACHEINANDER mit abstand abfragen, nie parallel.
+        // fehlerantworten (429/403/…) zählen nicht als 0, sondern kippen
+        // sauber in den demo-modus
+        const fetchDay = async (day) => {
+          const r = await fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}&end=${day}`);
+          if (!r.ok) throw new Error('goatcounter http ' + r.status);
+          const j = await r.json();
+          return Number(String(j.count).replace(/\D/g, '')) || 0;
+        };
         let counts = null, live = false;
         if (gc) {
           try {
-            counts = await Promise.all(
-              dayKeys.map((day) =>
-                fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}&end=${day}`)
-                  .then((r) => (r.ok ? r.json() : null))
-                  .then((j) => (j ? Number(String(j.count).replace(/\D/g, '')) || 0 : 0))
-              )
-            );
+            counts = [];
+            for (const day of dayKeys) {
+              counts.push(await fetchDay(day));
+              await new Promise((res) => setTimeout(res, 300));
+            }
             live = true;
           } catch { counts = null; }
         }
@@ -981,7 +989,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         $('actline').textContent = `${week} visitors / last 7 days`;
         $('actsub').textContent = live
           ? `today: ${counts[counts.length - 1]} · via goatcounter, cookie-free`
-          : 'demo signal — set GOATCOUNTER in site.js for live data';
+          : gc
+            ? 'demo signal — goatcounter counter api not reachable'
+            : 'demo signal — set GOATCOUNTER in site.js for live data';
         if (live) {
           // heutigen balken alle 60s aktualisieren
           setInterval(async () => {
