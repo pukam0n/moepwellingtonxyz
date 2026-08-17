@@ -34,7 +34,7 @@ alle werke leben in **`site/src/data/works.json`** — kein code nötig:
 
 ## canvas view (startseite `/`)
 
-node-graph-ansicht im stil von "ai artist 208" / comfyui — **seit v2 die startseite** (die brutaliste ansicht lebt unter `/classic/` weiter). blauer canvas mit punktraster, gelbe + graue fenster, blaue kabel mit durchhang, klassische graue os-topbar mit `?`-hilfe. pan (hintergrund ziehen), zoom (mausrad / buttons unten rechts), fenster verschiebbar an der titelleiste.
+node-graph-ansicht im stil von "ai artist 208" / comfyui — **seit v2 die startseite** (die brutaliste ansicht lebt unter `/classic/` weiter). graphit-canvas mit punktraster, graue fenster, gelbe kabel mit durchhang (farben in settings.cfg umstellbar), klassische graue os-topbar mit `?`-hilfe. pan (hintergrund ziehen), zoom (mausrad / buttons unten rechts), fenster verschiebbar an der titelleiste.
 
 - das **root-fenster** ist die schaltzentrale: jahres-fenster (2026 zuoberst, standardmäßig nur 2026 offen) und der character-creator lassen sich dort per klick an-/abschalten (zustand in localStorage).
 - der **viewer** zeigt 1–4 werke (slider), hat einen `rnd ⚂`-zufallsbutton und ist am eck-grip **resizable** — bilder skalieren mit. das about-fenster ebenso.
