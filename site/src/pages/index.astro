@@ -992,12 +992,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           d.setDate(d.getDate() - i);
           dayKeys.push(d.toISOString().slice(0, 10));
         }
-        // goatcounters counter-endpoint hat ein rate-limit (~4 req/s) —
-        // die tage daher NACHEINANDER mit abstand abfragen, nie parallel.
-        // fehlerantworten (429/403/…) zählen nicht als 0, sondern kippen
-        // sauber in den demo-modus
-        const fetchDay = async (day) => {
-          const r = await fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}&end=${day}`);
+        // goatcounters counter-endpoint: rate-limit (~4 req/s), daher
+        // NACHEINANDER abfragen. und statt start=TAG&end=TAG (unklare
+        // end-semantik, lieferte konstant 0) kumulativ "von tag X bis heute"
+        // nur mit start — die tageswerte entstehen als differenz benachbarter
+        // summen. fehlerantworten zählen nie als 0, sondern kippen in demo
+        const fetchFrom = async (day) => {
+          const r = await fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}`);
           if (!r.ok) throw new Error('goatcounter http ' + r.status);
           const j = await r.json();
           return Number(String(j.count).replace(/\D/g, '')) || 0;
@@ -1005,11 +1006,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         let counts = null, live = false;
         if (gc) {
           try {
-            counts = [];
+            const cums = [];
             for (const day of dayKeys) {
-              counts.push(await fetchDay(day));
+              cums.push(await fetchFrom(day));
               await new Promise((res) => setTimeout(res, 300));
             }
+            // dayKeys ist ältester -> heute; diff = besuche genau an dem tag
+            counts = cums.map((c, i) => Math.max(0, c - (cums[i + 1] ?? 0)));
             live = true;
           } catch { counts = null; }
         }
@@ -1047,10 +1050,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           // heutigen balken alle 60s aktualisieren
           setInterval(async () => {
             try {
-              const day = dayKeys[dayKeys.length - 1];
-              const r = await fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}&end=${day}`);
-              const j = await r.json();
-              const c = Number(String(j.count).replace(/\D/g, '')) || 0;
+              const c = await fetchFrom(dayKeys[dayKeys.length - 1]);
               $('actsub').textContent = `today: ${c} · via goatcounter, cookie-free`;
             } catch {}
           }, 60000);
