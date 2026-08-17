@@ -185,6 +185,18 @@ import sprites from '../../data/sprites.json';
       }
       #create:active { transform: translateY(2px); box-shadow: 2px 2px 0 var(--shadow); }
       #saved { margin-top: 8px; }
+
+      /* mobile: labels über den inhalt statt daneben — nichts quetscht */
+      @media (max-width: 640px) {
+        #topbar { position: static; height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px 10px; }
+        #topbar .tb-title { width: 100%; font-size: 20px; }
+        main { padding: 16px 10px 32px; }
+        .row { flex-direction: column; gap: 8px; }
+        .lbl { width: auto; padding-top: 0; }
+        #cname { width: 100%; }
+        .sprite-row { align-items: flex-start; }
+        #sprite { width: 160px; height: 160px; }
+      }
     </style>
 
     <script>
