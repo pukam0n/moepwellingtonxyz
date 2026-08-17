@@ -513,7 +513,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #charimg.gen-2 { transform: scaleX(-1); }
       #charimg.gen-3 { filter: invert(1); }
       #charimg.gen-4 { transform: scaleX(-1); filter: invert(1); }
-      @media (max-width: 1100px) { #charwin { display: none; } }
 
       /* residents.log — gästebuch: kompakte zeilen, klick öffnet die akte */
       #bookscroll { max-height: 420px; overflow-y: auto; margin-top: 6px; }
@@ -623,6 +622,12 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         #win-viewer { order: 1; }
         #win-gen { order: 2; }
         #win-root { order: 3; }
+        /* you-fenster: wird per js in den stapel gehängt, direkt nach root */
+        #charwin {
+          position: static; order: 4; width: 100%; max-width: 560px;
+          margin: 0 auto 18px;
+        }
+        #charimg { max-width: 192px; }
         .win::before, .win::after, #cables, #zoomctl, .grip { display: none !important; }
         html, body { overscroll-behavior: auto; }
       }
@@ -1101,6 +1106,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         const c = JSON.parse(localStorage.getItem('mpwCharacter') || 'null');
         if (!c) return;
         const box = $('charwin');
+        // mobile: das fixe fenster in den gestapelten flow hängen (flex-order
+        // platziert es nach dem root-fenster) — desktop bleibt fixed oben links
+        if (!isWide()) $('canvas').appendChild(box);
         $('charimg').src = box.dataset.spritebase + c.sprite + '.webp';
         if (c.gen) $('charimg').className = 'gen-' + (((c.gen - 1) % 4) + 1);
         $('charname').textContent = c.name;
