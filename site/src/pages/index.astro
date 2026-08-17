@@ -141,7 +141,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         <div class="win resizable" id="win-viewer" style="left:925px; top:80px; width:960px">
           <div class="win-title"><span class="sq r"></span><span class="sq b"></span> ▓░ VIEWER ── selected-works ░▒▓ <span class="sq y"></span></div>
           <div class="vbar">
-            <span class="dim small">windows:</span>
+            <span class="dim small slotlbl">windows:</span>
             <input type="range" id="slots" min="1" max="4" step="1" value="1" />
             <span id="slotcount">1</span>
             <span class="sp"></span>
@@ -603,6 +603,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         #topbar { position: static; height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px 10px; white-space: normal; }
         #topbar .tb-title { width: 100%; font-size: 20px; }
         #topbar .sp, #helpbtn, #helpwin { display: none !important; }
+        /* viewer-leiste: slider mobil ausblenden (mehrspaltig ist auf dem
+           handy sinnlos) — übrig bleibt stabil "prev · seite · next" */
+        .slotlbl, #slots, #slotcount, .vbar .sp { display: none !important; }
         #vp { position: static; overflow: visible; height: auto; cursor: default; touch-action: auto; }
         /* mobile: aufs wesentliche — viewer zuerst, dann generate.exe,
            dann das root-fenster, danach der rest in gewohnter reihenfolge */
