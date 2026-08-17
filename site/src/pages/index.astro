@@ -699,31 +699,44 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         setZoom(z * (e.deltaY < 0 ? 1.1 : 1 / 1.1), e.clientX - r.left, e.clientY - r.top);
       }, { passive: false });
 
-      // pan / fenster-drag / resize
-      let mode = null, sx = 0, sy = 0, dragWin = null, ox = 0, oy = 0, startW = 0;
+      // pan / fenster-drag / resize — mit drag-schwelle: erst ab ein paar
+      // pixeln bewegung gilt es als drag (klicks mit zittern bewegen nichts),
+      // und nach einem echten drag wird der anschliessende click geschluckt
+      const DRAG_MIN = 4;
+      let mode = null, armed = null, sx = 0, sy = 0, dragWin = null, ox = 0, oy = 0, startW = 0;
+      let downX = 0, downY = 0, dragged = false;
       vp.addEventListener('pointerdown', (e) => {
         if (!isWide()) return;
         const grip = e.target.closest('.grip');
         const title = e.target.closest('.win-title');
+        dragged = false;
         if (grip) {
-          mode = 'resize';
+          armed = 'resize';
           dragWin = grip.closest('.win');
           startW = dragWin.offsetWidth;
           sx = e.clientX;
         } else if (title) {
-          mode = 'win';
+          armed = 'win';
           dragWin = title.closest('.win');
           ox = (e.clientX - px) / z - dragWin.offsetLeft;
           oy = (e.clientY - py) / z - dragWin.offsetTop;
         } else if (e.target === vp || e.target === canvas || e.target === cablesEl) {
-          mode = 'pan';
+          armed = 'pan';
           sx = e.clientX - px;
           sy = e.clientY - py;
-          vp.classList.add('panning');
         } else return;
+        downX = e.clientX;
+        downY = e.clientY;
         vp.setPointerCapture(e.pointerId);
       });
       vp.addEventListener('pointermove', (e) => {
+        if (armed && !mode) {
+          if (Math.hypot(e.clientX - downX, e.clientY - downY) < DRAG_MIN) return;
+          mode = armed;
+          armed = null;
+          dragged = true;
+          if (mode === 'pan') vp.classList.add('panning');
+        }
         if (mode === 'pan') {
           px = e.clientX - sx;
           py = e.clientY - sy;
@@ -740,9 +753,18 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       });
       vp.addEventListener('pointerup', () => {
         mode = null;
+        armed = null;
         dragWin = null;
         vp.classList.remove('panning');
       });
+      // click nach echtem drag unterdrücken (capture, bevor buttons ihn sehen)
+      vp.addEventListener('click', (e) => {
+        if (dragged) {
+          e.stopPropagation();
+          e.preventDefault();
+          dragged = false;
+        }
+      }, true);
 
       // ---------- fenster an/aus über das root-fenster ----------
       const openState = prefs.open || { 'win-2026': true, 'win-activity': true, 'win-gen': true };
