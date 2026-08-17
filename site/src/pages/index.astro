@@ -586,6 +586,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
 
       #zoomctl {
         position: fixed; right: 16px; bottom: 16px; z-index: 100;
+        /* gleiche breite wie das you-fenster darüber — bündige spalte */
+        width: 192px; justify-content: space-between;
         display: flex; gap: 6px; align-items: center;
         background: var(--tb); border: 2px solid var(--border);
         box-shadow: inset 0 2px 0 var(--tb-hi), inset 0 -2px 0 var(--tb-lo), 4px 4px 0 rgba(0, 0, 0, 0.45);
@@ -596,9 +598,11 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         border-color: var(--tb-hi) var(--tb-lo) var(--tb-lo) var(--tb-hi);
       }
       #zoomctl button:active { border-color: var(--tb-lo) var(--tb-hi) var(--tb-hi) var(--tb-lo); }
-      /* fit im roten generate-look, damit er ins auge fällt */
-      #zoomfit { background: #c81111; color: #ffe94d; }
-      #zoomfit:hover { background: #a80e0e; }
+      /* fit DAUERHAFT rot im generate-look — doppelte id-spezifität nötig,
+         sonst gewinnt die graue #zoomctl-button-regel den background */
+      #zoomctl #zoomfit { background: #c81111; color: #ffe94d; border-color: #e8564e #7c0909 #7c0909 #e8564e; }
+      #zoomctl #zoomfit:hover { background: #a80e0e; }
+      #zoomctl #zoomfit:active { border-color: #7c0909 #e8564e #e8564e #7c0909; }
       #zoomlvl { min-width: 44px; text-align: center; font-size: 15px; color: #1a1a1a; }
 
       #lb { border: none; background: transparent; padding: 0; width: 100%; height: 100%; max-width: 100vw; max-height: 100dvh; }
