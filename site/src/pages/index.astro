@@ -105,6 +105,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             ))}
             <pre class="tree">│</pre>
             <button class="trow" data-win="win-cc">├── <span class="ind">[ ]</span> character-creator/</button>
+            <a class="trow charrow hidden" id="charsave-row" href="#" download="character.txt">│       ├── <u>save character.txt ↓</u></a>
+            <a class="trow charrow" id="charimport-row" href={url('/character-creator/')}>│       └── <u>import character →</u></a>
             <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
             <button class="trow" data-win="win-store">├── <span class="ind">[ ]</span> store/ <span class="dim">[soon]</span></button>
             <button class="trow" data-win="win-activity">├── <span class="ind">[ ]</span> activity.log</button>
@@ -280,7 +282,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       <hr class="chr" />
       <div id="charno" class="small dim"></div>
       <a class="small" id="charsave" href="#" download="character.txt">save character.txt ↓</a>
-      <div class="small dim charfoot">the archive remembers you.</div>
     </div>
 
     <div id="zoomctl">
@@ -437,6 +438,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         line-height: 1.45;
       }
       .trow:hover { background: rgba(0, 0, 0, 0.12); }
+      /* unterpunkte von character-creator: nur das label unterstreichen */
+      .charrow { text-decoration: none; }
       .trow .ind { font-weight: bold; }
       .trow.on .ind { color: #1a7a12; }
 
@@ -446,6 +449,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         box-shadow: 3px 3px 0 var(--shadow); text-align: left;
       }
       .tinybtn { display: inline-block; width: auto; box-shadow: 2px 2px 0 var(--shadow); font-size: 15px; }
+      /* viewer-steuerung im roten look von generate.exe / create character */
+      #vrnd, #vprev, #vnext { background: #c81111; color: var(--yb); }
       .loadbtn:active, .tinybtn:active { transform: translate(2px, 2px); box-shadow: none; }
       .loadbtn.on { background: var(--border); color: var(--yb); }
 
@@ -496,7 +501,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #charwin .chr { border: none; border-top: 2px dashed rgba(0, 0, 0, 0.25); margin: 7px 0; }
       .csrow { display: flex; justify-content: space-between; font-size: 13px; opacity: 0.85; line-height: 1.5; }
       .csrow .csbar { letter-spacing: 1px; }
-      .charfoot { margin-top: 4px; font-size: 12px; }
       /* generationen-optik wie im creator */
       #charimg.gen-2 { transform: scaleX(-1); }
       #charimg.gen-3 { filter: invert(1); }
@@ -1003,9 +1007,16 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         }
 
         // export: die character.txt ist jederzeit neu erzeugbar — gleiche
-        // form wie beim erstellen, direkt aus dem lokalen speicher
+        // form wie beim erstellen, direkt aus dem lokalen speicher.
+        // WICHTIG: format synchron halten mit persist() im character-creator
         const lines = [
           '== moepwellington.xyz — character file ==',
+          '',
+          'this file IS your character. keep it safe.',
+          'to bring the character back (new browser, new device):',
+          'moepwellington.xyz -> import character -> paste the',
+          'ENTIRE contents of this file. that is all.',
+          '',
           `name:      ${c.name}`,
           `class:     ${c.klass}`,
           `sprite:    #${c.sprite} / 266`,
@@ -1016,10 +1027,14 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           `created:   ${c.created}`,
           '',
           c.token
-            ? `recovery token (keep this — it is the only proof this character is yours):\n${c.token}`
+            ? `recovery token — the only proof this character is yours. do not share it:\n${c.token}`
             : 'no token — local character, lives in this browser only.',
         ].filter((l) => l !== null).join('\n');
-        $('charsave').href = URL.createObjectURL(new Blob([lines], { type: 'text/plain' }));
+        const blobUrl = URL.createObjectURL(new Blob([lines], { type: 'text/plain' }));
+        $('charsave').href = blobUrl;
+        // baum-eintrag "save character.txt" aktivieren
+        $('charsave-row').href = blobUrl;
+        $('charsave-row').classList.remove('hidden');
         // creator-fenster dauerhaft aus; zeile im root wird zum toggle
         openState['win-cc'] = false;
         const ccRow = document.querySelector('.trow[data-win="win-cc"]');

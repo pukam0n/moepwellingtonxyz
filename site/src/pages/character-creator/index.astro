@@ -67,7 +67,7 @@ import sprites from '../../data/sprites.json';
           <a href={url('/')}>return to the archive →</a>
         </p>
         <p class="dim small" id="restore-line">
-          <a href="#" id="restore">restore from character.txt →</a>
+          <a href="#" id="restore">import character →</a>
         </p>
       </div>
     </main>
@@ -390,8 +390,15 @@ import sprites from '../../data/sprites.json';
 
       function persist(character) {
         localStorage.setItem('mpwCharacter', JSON.stringify(character));
+        // WICHTIG: format synchron halten mit dem export im charwin (startseite)
         const lines = [
           '== moepwellington.xyz — character file ==',
+          '',
+          'this file IS your character. keep it safe.',
+          'to bring the character back (new browser, new device):',
+          'moepwellington.xyz -> import character -> paste the',
+          'ENTIRE contents of this file. that is all.',
+          '',
           `name:      ${character.name}`,
           `class:     ${character.klass}`,
           `sprite:    #${character.sprite} / ${IDS.length}`,
@@ -400,7 +407,7 @@ import sprites from '../../data/sprites.json';
           `created:   ${character.created}`,
           '',
           character.token
-            ? `recovery token (keep this — it is the only proof this character is yours):\n${character.token}`
+            ? `recovery token — the only proof this character is yours. do not share it:\n${character.token}`
             : 'no token — local character, lives in this browser only.',
         ].join('\n');
         $('dl').href = URL.createObjectURL(new Blob([lines], { type: 'text/plain' }));
@@ -467,7 +474,7 @@ import sprites from '../../data/sprites.json';
       $('restore').addEventListener('click', async (e) => {
         e.preventDefault();
         if (!REG) return showErr('local mode — nothing to restore from.');
-        const input = prompt('paste your recovery token (or the whole character.txt):');
+        const input = prompt('paste the entire contents of your character.txt:');
         if (!input) return;
         // token aus beliebigem text fischen (doppel-uuid, 73 zeichen)
         const tm = input.match(/[0-9a-f-]{60,90}/i);
