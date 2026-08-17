@@ -134,7 +134,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           </div>
         ))}
 
-        <div class="win resizable" id="win-viewer" style="left:800px; top:75px; width:790px">
+        <div class="win resizable" id="win-viewer" style="left:815px; top:105px; width:960px">
           <div class="win-title"><span class="sq r"></span><span class="sq b"></span> ▓░ VIEWER ── selected-works ░▒▓ <span class="sq y"></span></div>
           <div class="vbar">
             <span class="dim small">windows:</span>
@@ -195,7 +195,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <p class="dim small">© 2022–2026 moe p. wellington</p>
         </div>
 
-        <div class="win togglable hidden" id="win-gen" style="left:1640px; top:500px; width:300px">
+        <div class="win togglable hidden" id="win-gen" style="left:1820px; top:500px; width:300px">
           <div class="win-title"><span class="sq r"></span> ▓▒ generate.exe ░▒</div>
           <div class="small dim">prompt:</div>
           <input id="genprompt" type="text" value="dense pseudo-os collage, surreal core motif" spellcheck="false" />
@@ -203,7 +203,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <pre id="genlog" class="small dim">ready. model: mpw-diffusion-v0.8 (local)</pre>
         </div>
 
-        <div class="win togglable hidden resizable" id="win-store" style="left:1640px; top:700px; width:330px">
+        <div class="win togglable hidden resizable" id="win-store" style="left:1820px; top:700px; width:330px">
           <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓░ store/ ▒░▓</div>
           {storeItems.map((it) => (
             <div class="stitem">
@@ -225,7 +225,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div class="win alt togglable hidden" id="win-proxy" style="left:1650px; top:140px; width:330px">
+        <div class="win alt togglable hidden" id="win-proxy" style="left:2160px; top:80px; width:330px">
           <div class="win-title"><span class="sq b"></span><span class="sq r"></span> ▒▓ proxy.param ░</div>
           <img class="proxyimg" src={animations.find((a) => a.slug === 'proxy')?.image} alt="proxy — animation, 2026" loading="lazy" />
           <pre class="small dim">signal: live · 76 frames · loop
@@ -233,14 +233,14 @@ proxy, 2026 — the artwork as
 an abstract parameter.</pre>
         </div>
 
-        <div class="win alt togglable" id="win-activity" style="left:1640px; top:80px; width:300px" data-gc={GOATCOUNTER}>
+        <div class="win alt togglable" id="win-activity" style="left:1820px; top:80px; width:300px" data-gc={GOATCOUNTER}>
           <div class="win-title"><span class="sq y"></span> ▒ archive activity ░▓</div>
           <svg id="actgraph" viewBox="0 0 280 56" width="100%" aria-hidden="true"></svg>
           <div class="small" id="actline">measuring…</div>
           <div class="small dim" id="actsub"></div>
         </div>
 
-        <div class="win alt" id="win-settings" style="left:1640px; top:290px; width:300px">
+        <div class="win alt" id="win-settings" style="left:1830px; top:255px; width:300px">
           <div class="win-title"><span class="sq b"></span><span class="sq y"></span> ▒▓ settings.cfg ░</div>
           <div class="small">canvas:</div>
           <div class="swrow" id="bgswatches">
@@ -729,7 +729,7 @@ an abstract parameter.</pre>
         ['win-2022', 'win-viewer'], ['win-2023', 'win-viewer'], ['win-2024', 'win-viewer'],
         ['win-2025', 'win-viewer'], ['win-2026', 'win-viewer'],
         ['win-root', 'win-cc'], ['win-viewer', 'win-settings'],
-        ['win-root', 'win-about', 'left'], ['win-about', 'win-info', 'left'],
+        ['win-root', 'win-about', 'left'], ['win-root', 'win-info', 'left'],
         ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
         ['win-root', 'win-store'], ['win-store', 'win-info'],
         ['win-viewer', 'win-activity'], ['win-activity', 'win-settings'],
@@ -755,16 +755,17 @@ an abstract parameter.</pre>
           const color = mixSet ? mixSet[ci++ % mixSet.length] : single;
           let d, x1, y1, x2, y2;
           if (mode === 'left') {
-            // andersherum: links raus, bogen nach außen, links wieder rein —
-            // mit derselben schwerkraft wie rechts: beide kontrollpunkte
-            // hängen unter ihren ports durch, das kabel fällt erst und
-            // steigt dann von unten in den zielport ein
+            // andersherum: links raus in den freien raum. das kabel fällt
+            // steil aus dem oberen port (kontrollpunkt weit unten), schwingt
+            // links aussen vorbei und läuft horizontal in den zielport ein.
+            // beide kontrollpunkte liegen links der ports — die kurve bleibt
+            // damit immer im leeren bereich, nie hinter fenstern
             x1 = A.offsetLeft; y1 = A.offsetTop + 22;
             x2 = B.offsetLeft; y2 = B.offsetTop + 22;
             const dist = Math.hypot(x2 - x1, y2 - y1);
-            const bulge = Math.min(60 + dist * 0.22, 200);
-            const sag = Math.min(Math.max(0, dist - 120) * 0.3, 240);
-            d = `M${x1} ${y1} C${x1 - bulge} ${y1 + sag}, ${x2 - bulge} ${y2 + sag}, ${x2} ${y2}`;
+            const bulge = Math.min(70 + dist * 0.18, 180);
+            const sag = Math.min(dist * 0.5, 380);
+            d = `M${x1} ${y1} C${x1 - bulge} ${y1 + sag}, ${x2 - bulge} ${y2}, ${x2} ${y2}`;
           } else {
             const leftFirst = A.offsetLeft + A.offsetWidth / 2 <= B.offsetLeft + B.offsetWidth / 2;
             x1 = leftFirst ? A.offsetLeft + A.offsetWidth : A.offsetLeft;
