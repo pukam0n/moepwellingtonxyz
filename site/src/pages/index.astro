@@ -892,6 +892,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       let selection = DATA.byYear['2026'] || DATA.featured, srcLabel = '2026', page = 0, slots = 1;
       function renderViewer() {
         const el = $('vslots');
+        // alte höhe festhalten, bis die neuen bilder geladen sind — sonst
+        // kollabiert das fenster für einen frame und alles springt
+        if (el.offsetHeight) el.style.minHeight = el.offsetHeight + 'px';
         el.dataset.slots = slots;
         const pages = Math.max(1, Math.ceil(selection.length / slots));
         page = Math.min(page, pages - 1);
@@ -910,6 +913,18 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         document.querySelectorAll('.loadbtn').forEach((b) =>
           b.classList.toggle('on', b.dataset.load === srcLabel || (srcLabel === 'selected-works' && b.dataset.load === 'featured'))
         );
+        // min-height erst lösen, wenn alle neuen bilder geladen sind
+        const imgs = [...el.querySelectorAll('img')];
+        let pending = imgs.filter((im) => !im.complete).length;
+        const release = () => {
+          el.style.minHeight = '';
+          drawCables();
+        };
+        if (!pending) release();
+        else imgs.forEach((im) => {
+          if (!im.complete) im.addEventListener('load', () => { if (--pending <= 0) release(); }, { once: true });
+          if (!im.complete) im.addEventListener('error', () => { if (--pending <= 0) release(); }, { once: true });
+        });
         drawCables();
       }
       $('slots').addEventListener('input', (e) => {
