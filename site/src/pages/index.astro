@@ -129,7 +129,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
                 <img src={w.thumb} alt={w.title} loading="lazy" width="64" height="64" />
               ))}
             </div>
-            <div class="dim small">{yw.length} works</div>
+            <div class="dim small">{yw.length} {yw.length === 1 ? 'work' : 'works'}</div>
             <button class="loadbtn" data-load={String(year)}>load {year} →</button>
           </div>
         ))}
@@ -755,14 +755,16 @@ an abstract parameter.</pre>
           const color = mixSet ? mixSet[ci++ % mixSet.length] : single;
           let d, x1, y1, x2, y2;
           if (mode === 'left') {
-            // andersherum: links raus, bogen nach außen, links wieder rein.
-            // tangenten an beiden enden horizontal — das kabel verlässt und
-            // trifft die fenster sauber seitlich statt schräg zu schwingen
+            // andersherum: links raus, bogen nach außen, links wieder rein —
+            // mit derselben schwerkraft wie rechts: beide kontrollpunkte
+            // hängen unter ihren ports durch, das kabel fällt erst und
+            // steigt dann von unten in den zielport ein
             x1 = A.offsetLeft; y1 = A.offsetTop + 22;
             x2 = B.offsetLeft; y2 = B.offsetTop + 22;
             const dist = Math.hypot(x2 - x1, y2 - y1);
             const bulge = Math.min(60 + dist * 0.22, 200);
-            d = `M${x1} ${y1} C${x1 - bulge} ${y1}, ${x2 - bulge} ${y2}, ${x2} ${y2}`;
+            const sag = Math.min(Math.max(0, dist - 120) * 0.3, 240);
+            d = `M${x1} ${y1} C${x1 - bulge} ${y1 + sag}, ${x2 - bulge} ${y2 + sag}, ${x2} ${y2}`;
           } else {
             const leftFirst = A.offsetLeft + A.offsetWidth / 2 <= B.offsetLeft + B.offsetWidth / 2;
             x1 = leftFirst ? A.offsetLeft + A.offsetWidth : A.offsetLeft;
@@ -804,7 +806,7 @@ an abstract parameter.</pre>
           )
           .join('');
         $('vpage').textContent = `${page + 1}/${pages}`;
-        $('vsrc').textContent = `source: ${srcLabel} · ${selection.length} works`;
+        $('vsrc').textContent = `source: ${srcLabel} · ${selection.length} ${selection.length === 1 ? 'work' : 'works'}`;
         $('slotcount').textContent = slots;
         document.querySelectorAll('.loadbtn').forEach((b) =>
           b.classList.toggle('on', b.dataset.load === srcLabel || (srcLabel === 'selected-works' && b.dataset.load === 'featured'))

@@ -10,7 +10,7 @@ export const url = (p) => BASE + p;
 // für https://moepwellington.goatcounter.com — leer = demo-modus ohne tracking.
 // setup: kostenloses konto auf goatcounter.com, dort "allow adding visitor
 // counts on your website" aktivieren, code hier eintragen.
-export const GOATCOUNTER = '';
+export const GOATCOUNTER = 'moepwellington';
 
 // url des avatar-registry-workers (cloudflare), z. b.
 // 'https://avatar-registry.DEIN-SUBDOMAIN.workers.dev' — leer = lokaler modus
