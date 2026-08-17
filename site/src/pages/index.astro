@@ -515,13 +515,22 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #charimg.gen-4 { transform: scaleX(-1); filter: invert(1); }
       @media (max-width: 1100px) { #charwin { display: none; } }
 
-      /* residents.log — gästebuch aller charaktere */
+      /* residents.log — gästebuch: kompakte zeilen, klick öffnet die akte */
       #bookscroll { max-height: 420px; overflow-y: auto; margin-top: 6px; }
-      .bkrow { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-top: 2px dashed rgba(0, 0, 0, 0.2); }
+      .bkrow {
+        display: flex; gap: 8px; align-items: center; width: 100%;
+        padding: 5px 2px; background: none; border: none; text-align: left;
+        color: var(--text); font: inherit;
+        border-top: 2px dashed rgba(0, 0, 0, 0.2);
+      }
       .bkrow:first-child { border-top: none; }
-      .bkrow img { width: 44px; height: 44px; border: 2px solid var(--border); background: #efe9d8; image-rendering: pixelated; flex-shrink: 0; }
-      .bkinfo { min-width: 0; }
-      .bkname { font-size: 16px; overflow-wrap: anywhere; }
+      .bkrow:hover, .bkrow.open { background: rgba(0, 0, 0, 0.1); }
+      .bkrow img { width: 36px; height: 36px; border: 2px solid var(--border); background: #efe9d8; image-rendering: pixelated; flex-shrink: 0; }
+      .bkname { font-size: 16px; overflow-wrap: anywhere; min-width: 0; flex: 1; }
+      .bknum { flex-shrink: 0; }
+      .bkdetail { padding: 4px 2px 10px 10px; }
+      .bkdetail .csrow { max-width: 230px; }
+      .bkmeta { margin-top: 4px; }
 
       /* archive activity */
       #actgraph { display: block; margin-bottom: 6px; }
@@ -765,21 +774,42 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             return;
           }
           $('bookline').textContent = `${j.residents.length} resident${j.residents.length === 1 ? '' : 's'} · newest first`;
-          $('bookscroll').innerHTML = j.residents.map((c) => `
-            <div class="bkrow">
-              <img class="gen-${((Number(c.gen) - 1) % 4) + 1}" src="${box.dataset.spritebase}${esc(c.sprite)}.webp" alt="" loading="lazy" width="44" height="44" />
-              <div class="bkinfo">
-                <div class="bkname">${esc(c.name)}</div>
-                <div class="small dim">${esc(c.klass || '—')}</div>
-                <div class="small dim">#${Number(c.num)} · gen ${Number(c.gen)} · ${esc(String(c.created).slice(0, 10))}</div>
-              </div>
-            </div>`).join('');
+          const BSTATS = ['literacy', 'bandwidth', 'provenance', 'friction', 'patience'];
+          $('bookscroll').innerHTML = j.residents.map((c) => {
+            const hasStats = c.stats && BSTATS.every((s) => s in c.stats);
+            const detail = `
+              <div class="small">${esc(c.klass || 'class unrecorded')}</div>
+              ${hasStats
+                ? BSTATS.map((s) => `<div class="csrow"><span>${s}</span><span class="csbar">${'▮'.repeat(c.stats[s])}${'▯'.repeat(5 - c.stats[s])}</span></div>`).join('')
+                : '<div class="small dim">stats unrecorded</div>'}
+              <div class="small dim bkmeta">sprite #${esc(c.sprite)} / 266 · gen ${Number(c.gen)} · ${esc(String(c.created).slice(0, 10))}</div>`;
+            return `
+              <button class="bkrow" type="button">
+                <img class="gen-${((Number(c.gen) - 1) % 4) + 1}" src="${box.dataset.spritebase}${esc(c.sprite)}.webp" alt="" loading="lazy" width="36" height="36" />
+                <span class="bkname">${esc(c.name)}</span>
+                <span class="small dim bknum">#${Number(c.num)}</span>
+              </button>
+              <div class="bkdetail hidden">${detail}</div>`;
+          }).join('');
           drawCables();
         } catch {
           bookLoaded = false;
           $('bookline').textContent = 'registry unreachable — try again later.';
         }
       }
+      // profil auf-/zuklappen — immer nur eines offen, bleibt ruhig
+      $('bookscroll').addEventListener('click', (e) => {
+        const row = e.target.closest('.bkrow');
+        if (!row) return;
+        const det = row.nextElementSibling;
+        const wasOpen = !det.classList.contains('hidden');
+        document.querySelectorAll('.bkdetail').forEach((d) => d.classList.add('hidden'));
+        document.querySelectorAll('.bkrow.open').forEach((r) => r.classList.remove('open'));
+        if (!wasOpen) {
+          det.classList.remove('hidden');
+          row.classList.add('open');
+        }
+      });
       document.querySelectorAll('.trow[data-win]').forEach((b) =>
         b.addEventListener('click', () => {
           openState[b.dataset.win] = !openState[b.dataset.win];
