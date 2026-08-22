@@ -110,7 +110,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="trow" data-win="win-cc">├── <span class="ind">[ ]</span> character-creator/</button>
             <a class="trow charrow hidden" id="charsave-row" href="#" download="character.txt">│       ├── <u>save character.txt ↓</u></a>
             <a class="trow charrow" id="charimport-row" href={url('/character-creator/')}>│       └── <u>import character →</u></a>
-            <button class="trow" data-win="win-game">├── <span class="ind">[ ]</span> ground-forces.exe <span class="dim">[new]</span></button>
+            <a class="trow charrow" href={url('/ground-forces/')}>├── <span class="ind">[ ]</span> <u>ground-forces.exe</u> <span class="dim">(alpha test)</span></a>
             <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
             <button class="trow" data-win="win-store">├── <span class="ind">[ ]</span> store/ <span class="dim">[soon]</span></button>
             <button class="trow" data-win="win-activity">├── <span class="ind">[ ]</span> activity.log</button>
@@ -161,12 +161,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
         </div>
 
-        <div class="win" id="win-teaser" style="left:70px; top:890px; width:340px">
-          <div class="win-title"><span class="sq r"></span> ▒▒ new.gif ░▒</div>
+        <div class="win" id="win-teaser" style="left:70px; top:890px; width:195px">
+          <div class="win-title"><span class="sq r"></span> ▒ new.gif ░</div>
           <a id="teaser" href={url('/ground-forces/')}>
-            <span id="teasertxt">★ OUT NOW ★</span>
-            <svg id="teaserarrow" viewBox="0 0 100 56" aria-hidden="true"><polygon points="0,19 52,19 52,4 100,28 52,52 52,37 0,37" /></svg>
-            <span id="teasertxt2">!! click here !!</span>
+            <span class="tspark s1">✦</span><span class="tspark s2">✧</span><span class="tspark s3">✦</span><span class="tspark s4">✧</span>
+            <span id="teasertxt">OUT NOW</span>
+            <span id="tarrww"><svg id="teaserarrow" viewBox="0 0 100 56" aria-hidden="true"><polygon class="ta-body" points="0,19 52,19 52,4 100,28 52,52 52,37 0,37" /><polygon class="ta-shine" points="6,23 48,23 48,28 6,28" /></svg></span>
+            <span id="teasertxt2">!! wow !!</span>
           </a>
         </div>
 
@@ -206,13 +207,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <p class="dim small">© 2022–2026 moe p. wellington</p>
         </div>
 
-        <div class="win togglable" id="win-game" style="left:510px; top:80px; width:300px">
-          <div class="win-title"><span class="sq r"></span><span class="sq y"></span> ▓▒ ground-forces.exe ░</div>
-          <div class="small dim">wave defense · mpw-forge v0.9</div>
-          <a class="ccbtn gamebtn" href={url('/ground-forces/')}>PLAY →</a>
-        </div>
-
-        <div class="win togglable" id="win-gen" style="left:510px; top:215px; width:300px">
+        <div class="win togglable" id="win-gen" style="left:510px; top:130px; width:300px">
           <div class="win-title"><span class="sq r"></span> ▓▒ generate.exe ░▒</div>
           <div class="small dim">prompt:</div>
           <input id="genprompt" type="text" value="the work of art in the age of artificial reproduction" spellcheck="false" />
@@ -543,22 +538,50 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #charimg.gen-3 { filter: invert(1); }
       #charimg.gen-4 { transform: scaleX(-1); filter: invert(1); }
 
-      /* teaser: 2000er blink-banner — pfeil zeigt zur game-spalte und
-         spiegelt sich, wenn das fenster auf die andere seite gezogen wird */
-      #teaser { display: block; text-align: center; text-decoration: none; padding: 2px 0 4px; }
-      #teasertxt {
-        display: block; font-size: 24px; letter-spacing: 3px; color: #c81111;
-        animation: tblink 0.5s steps(1) infinite;
+      /* teaser: flash-ära banner — dither-textur, funkelnde sterne,
+         pumpender text, pulsierender pfeil mit lauflicht-shine. der pfeil
+         spiegelt sich, wenn das fenster rechts vom portfolio hängt — der
+         text bleibt dabei bewusst ungespiegelt lesbar */
+      #teaser {
+        display: block; position: relative; overflow: hidden;
+        text-align: center; text-decoration: none; padding: 3px 0 5px;
+        background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.09) 0% 25%, transparent 0% 50%);
+        background-size: 8px 8px;
       }
-      #teaserarrow { display: block; width: 118px; margin: 0 auto; transform: rotate(-28deg); animation: tarrow 0.4s steps(1) infinite; }
-      #teaserarrow polygon { fill: #c81111; stroke: var(--border); stroke-width: 4; }
-      #teasertxt2 { font-size: 16px; text-decoration: underline; color: var(--text); animation: tblink 0.5s steps(1) 0.25s infinite; }
+      .tspark {
+        position: absolute; font-size: 15px; color: #ffe94d;
+        text-shadow: 1px 1px 0 var(--border);
+        animation: tsp 0.9s steps(2) infinite;
+      }
+      .tspark.s1 { left: 7px; top: 6px; }
+      .tspark.s2 { right: 9px; top: 20px; animation-delay: 0.22s; color: #c81111; }
+      .tspark.s3 { left: 12px; bottom: 30px; animation-delay: 0.45s; }
+      .tspark.s4 { right: 7px; bottom: 12px; animation-delay: 0.68s; color: #e8a01c; }
+      @keyframes tsp { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.15; transform: scale(0.55) rotate(45deg); } }
+      #teasertxt {
+        display: block; font-size: 22px; letter-spacing: 2px; color: #c81111;
+        text-shadow: 2px 2px 0 #ffe94d;
+        animation: tpump 0.6s steps(2) infinite;
+      }
+      @keyframes tpump {
+        0% { color: #c81111; text-shadow: 2px 2px 0 #ffe94d; transform: translateY(0); }
+        50% { color: #e8a01c; text-shadow: 2px 2px 0 #c81111; transform: translateY(-1px); }
+      }
+      #tarrww { display: block; animation: tjig 0.5s steps(2) infinite; }
+      @keyframes tjig { 0% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
+      #teaserarrow { display: block; width: 96px; margin: 1px auto; transform: rotate(-28deg); }
       #win-teaser.flip #teaserarrow { transform: scaleX(-1) rotate(-28deg); }
-      #win-teaser.flip #teasertxt, #win-teaser.flip #teasertxt2 { visibility: hidden; }
-      @keyframes tblink { 0% { color: #c81111; } 50% { color: #e8a01c; } }
-      @keyframes tarrow { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+      #win-teaser.flip #tarrww { animation-direction: reverse; }
+      .ta-body { fill: #c81111; stroke: var(--border); stroke-width: 4; animation: tafill 0.8s steps(2) infinite; }
+      @keyframes tafill { 0% { fill: #c81111; } 50% { fill: #e8501e; } }
+      .ta-shine { fill: rgba(255, 255, 255, 0.75); animation: tshine 0.5s steps(2) infinite; }
+      @keyframes tshine { 0% { opacity: 1; } 50% { opacity: 0; } }
+      #teasertxt2 {
+        display: block; font-size: 15px; letter-spacing: 1px; color: var(--text);
+        animation: tsp 0.7s steps(2) 0.1s infinite;
+      }
       @media (prefers-reduced-motion: reduce) {
-        #teasertxt, #teasertxt2, #teaserarrow { animation: none; }
+        #teasertxt, #teasertxt2, #tarrww, .tspark, .ta-body, .ta-shine { animation: none; }
       }
 
       /* feedback.exe */
@@ -815,7 +838,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           py = e.clientY - sy;
           apply();
         } else if (mode === 'win') {
-          dragWin.style.left = Math.max(0, (e.clientX - px) / z - ox) + 'px';
+          dragWin.style.left = Math.max(-340, (e.clientX - px) / z - ox) + 'px';
           dragWin.style.top = Math.max(0, (e.clientY - py) / z - oy) + 'px';
           drawCables();
         } else if (mode === 'resize') {
@@ -840,11 +863,10 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       }, true);
 
       // ---------- fenster an/aus über das root-fenster ----------
-      const openState = prefs.open || { 'win-2026': true, 'win-activity': true, 'win-gen': true, 'win-game': true };
+      const openState = prefs.open || { 'win-2026': true, 'win-activity': true, 'win-gen': true };
       // neue standard-fenster für bestehende gespeicherte zustände nachrüsten
       if (!('win-activity' in openState)) openState['win-activity'] = true;
       if (!('win-gen' in openState)) openState['win-gen'] = true;
-      if (!('win-game' in openState)) openState['win-game'] = true;
       function applyOpen() {
         document.querySelectorAll('.togglable').forEach((w) =>
           w.classList.toggle('hidden', !openState[w.id])
@@ -929,7 +951,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         ['win-2025', 'win-viewer'], ['win-2026', 'win-viewer'],
         ['win-root', 'win-cc'], ['win-viewer', 'win-settings'],
         ['win-root', 'win-about', 'left'], ['win-root', 'win-info', 'left'],
-        ['win-root', 'win-game'],
         ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
         ['win-root', 'win-store'], ['win-store', 'win-info'],
         ['win-root', 'win-report'],
@@ -989,8 +1010,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         }
         cablesEl.setAttribute('viewBox', `0 0 ${canvas.offsetWidth} ${canvas.offsetHeight}`);
         cablesEl.innerHTML = html;
-        // teaser-pfeil: spiegeln, sobald das fenster rechts der game-spalte hängt
-        const tw = $('win-teaser'), gw = $('win-game');
+        // teaser-pfeil: spiegeln, sobald das fenster rechts vom portfolio hängt
+        const tw = $('win-teaser'), gw = $('win-root');
         if (tw && gw) {
           tw.classList.toggle('flip', tw.offsetLeft + tw.offsetWidth / 2 > gw.offsetLeft + gw.offsetWidth / 2);
         }
