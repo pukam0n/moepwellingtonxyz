@@ -9,6 +9,10 @@
 //                            409 { error: "sprite_taken" | "name_taken" }
 //   GET  /me?token=...    -> gespeicherter charakter oder 404
 //   GET  /book            -> alle charaktere, öffentliche felder, neueste zuerst
+//   GET  /likes           -> { likes: { "<slug>": n, ... } }
+//   POST /like            -> body { slug, on } — anonymer zähler +1/-1
+//   POST /feedback        -> body { text } — anonyme feedback-box (max 2000)
+//   GET  /feedback?token= -> alle einträge; nur mit dem token von charakter #1
 //   POST /repair          -> body { token, stats?, klass? }
 //                            trägt NUR fehlende attribute/klasse nach
 //                            (für alte claims ohne stats) — nie überschreiben
@@ -182,6 +186,64 @@ export class Registry {
         ['token:' + token]: character,
       });
       return json({ ...character, token }, 201);
+    }
+
+    if (url.pathname === '/likes') {
+      const map = await storage.list<number>({ prefix: 'like:' });
+      const likes: Record<string, number> = {};
+      for (const [k, v] of map) if (v > 0) likes[k.slice(5)] = v;
+      return json({ likes });
+    }
+
+    if (url.pathname === '/like' && req.method === 'POST') {
+      let body: { slug?: string; on?: boolean };
+      try {
+        body = await req.json();
+      } catch {
+        return json({ error: 'bad_request' }, 400);
+      }
+      const slug = String(body.slug ?? '');
+      if (!/^[a-z0-9-]{1,64}$/.test(slug)) return json({ error: 'bad_slug' }, 400);
+      const key = 'like:' + slug;
+      const cur = (await storage.get<number>(key)) ?? 0;
+      const next = Math.max(0, cur + (body.on ? 1 : -1));
+      await storage.put(key, next);
+      return json({ slug, count: next });
+    }
+
+    if (url.pathname === '/feedback' && req.method === 'POST') {
+      let body: { text?: string; url?: string; website?: string };
+      try {
+        body = await req.json();
+      } catch {
+        return json({ error: 'bad_request' }, 400);
+      }
+      // honeypot: echte menschen füllen das unsichtbare feld nie aus
+      if (body.website) return json({ ok: true });
+      const text = String(body.text ?? '').trim().slice(0, 2000);
+      if (text.length < 3) return json({ error: 'too_short' }, 400);
+      // sanftes rate-limit: global höchstens ein eintrag alle 5 sekunden
+      const last = (await storage.get<number>('fb:last')) ?? 0;
+      if (Date.now() - last < 5000) return json({ error: 'slow_down' }, 429);
+      const id = 'fb:' + Date.now() + ':' + crypto.randomUUID().slice(0, 8);
+      await storage.put({
+        [id]: { text, url: String(body.url ?? '').slice(0, 200), created: new Date().toISOString() },
+        'fb:last': Date.now(),
+      });
+      return json({ ok: true });
+    }
+
+    if (url.pathname === '/feedback' && req.method === 'GET') {
+      // inbox: lesbar nur mit dem recovery-token von charakter #1 (der artist)
+      const token = url.searchParams.get('token') ?? '';
+      const owner = token ? await storage.get<Character>('token:' + token) : null;
+      if (!owner || owner.num !== 1) return json({ error: 'not_found' }, 404);
+      const map = await storage.list<{ text: string; url: string; created: string }>({ prefix: 'fb:' });
+      const entries = [...map.entries()]
+        .filter(([k]) => k !== 'fb:last')
+        .map(([, v]) => v)
+        .sort((a, b) => String(b.created).localeCompare(String(a.created)));
+      return json({ count: entries.length, entries });
     }
 
     if (url.pathname === '/book') {
