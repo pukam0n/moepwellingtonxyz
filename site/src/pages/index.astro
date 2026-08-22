@@ -110,7 +110,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="trow" data-win="win-cc">├── <span class="ind">[ ]</span> character-creator/</button>
             <a class="trow charrow hidden" id="charsave-row" href="#" download="character.txt">│       ├── <u>save character.txt ↓</u></a>
             <a class="trow charrow" id="charimport-row" href={url('/character-creator/')}>│       └── <u>import character →</u></a>
-            <a class="trow charrow" href={url('/ground-forces/')}>├── <span class="ind">[ ]</span> <u>ground-forces.exe</u> <span class="dim">(alpha test)</span></a>
+            <a class="trow charrow devonly hidden" href={url('/ground-forces/')}>├── <span class="ind">[ ]</span> <u>ground-forces.exe</u> <span class="dim">(alpha test)</span></a>
             <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
             <button class="trow" data-win="win-store">├── <span class="ind">[ ]</span> store/ <span class="dim">[soon]</span></button>
             <button class="trow" data-win="win-activity">├── <span class="ind">[ ]</span> activity.log</button>
@@ -161,7 +161,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
         </div>
 
-        <div class="win" id="win-teaser" style="left:-115px; top:390px; width:195px">
+        <div class="win devonly hidden" id="win-teaser" style="left:-115px; top:390px; width:195px">
           <div class="win-title"><span class="tad">▶</span> new.gif <span class="sp"></span><button id="teaserx" title="close">×</button></div>
           <a id="teaser" href={url('/ground-forces/')}>
             <span class="tspark s1">✦</span><span class="tspark s2">✧</span><span class="tspark s3">✦</span><span class="tspark s4">✧</span>
@@ -761,6 +761,17 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       const DATA = JSON.parse($('works-data').textContent);
       const vp = $('vp'), canvas = $('canvas'), cablesEl = $('cables');
       const isWide = () => window.matchMedia('(min-width: 1101px)').matches;
+
+      // ---------- devmode: unveröffentlichtes nur für den artist ----------
+      // /?dev einschalten · /?dev=off ausschalten — der zustand bleibt im
+      // browser gespeichert, bis er explizit ausgeschaltet wird
+      const devq = new URLSearchParams(location.search);
+      if (devq.has('dev')) {
+        if (devq.get('dev') === 'off') localStorage.removeItem('mpwDev');
+        else localStorage.setItem('mpwDev', '1');
+      }
+      if (localStorage.getItem('mpwDev'))
+        document.querySelectorAll('.devonly').forEach((el) => el.classList.remove('hidden'));
 
       // ---------- prefs (farben + offene fenster) ----------
       const PREFS_KEY = 'canvasPrefs';
