@@ -216,13 +216,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <pre id="genlog" class="small dim">ready. model: mpw-diffusion-v0.8 (local)</pre>
         </div>
 
-        <div class="win alt togglable hidden" id="win-book" style="left:2040px; top:590px; width:300px" data-reg={REGISTRY} data-spritebase={url('/sprites/')}>
+        <div class="win alt togglable hidden" id="win-book" style="left:2040px; top:735px; width:300px" data-reg={REGISTRY} data-spritebase={url('/sprites/')}>
           <div class="win-title"><span class="sq y"></span><span class="sq b"></span> ▒▓ residents.log ░</div>
           <div class="small dim" id="bookline">opening the ledger…</div>
           <div id="bookscroll"></div>
         </div>
 
-        <div class="win alt togglable hidden" id="win-report" style="left:2040px; top:990px; width:300px" data-reg={REGISTRY}>
+        <div class="win alt togglable hidden" id="win-report" style="left:2040px; top:1105px; width:300px" data-reg={REGISTRY}>
           <div class="win-title"><span class="sq b"></span> ▒ feedback.exe ░</div>
           <div class="small dim">bugs, ideas, greetings — straight to the archive.</div>
           <textarea id="fbtext" rows="5" maxlength="2000" placeholder="type here…"></textarea>
@@ -231,7 +231,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="small dim" id="fbstatus"></div>
         </div>
 
-        <div class="win togglable hidden resizable" id="win-store" style="left:2040px; top:1280px; width:330px">
+        <div class="win togglable hidden resizable" id="win-store" style="left:2040px; top:1400px; width:330px">
           <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓░ store/ ▒░▓</div>
           {storeItems.map((it) => (
             <div class="stitem">
@@ -261,6 +261,12 @@ click artwork ····· fullscreen (←/→, esc)</pre>
 
         <div class="win alt" id="win-settings" style="left:2040px; top:305px; width:300px">
           <div class="win-title"><span class="sq b"></span><span class="sq y"></span> ▒▓ settings.cfg ░</div>
+          <div class="small">presets:</div>
+          <div class="swrow" id="presetrow">
+            <button class="preset" data-p="graphite">graphite</button>
+            <button class="preset" data-p="blueprint">blueprint</button>
+            <button class="preset" data-p="parade">parade</button>
+          </div>
           <div class="small">canvas:</div>
           <div class="swrow" id="bgswatches">
             <button class="swatch" data-v="" title="graphite (default)" style="background:#242424"></button>
@@ -269,6 +275,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="swatch" data-v="#0d1b3e" title="deep navy" style="background:#0d1b3e"></button>
             <button class="swatch" data-v="#008080" title="win teal" style="background:#008080"></button>
             <button class="swatch" data-v="#0d2626" title="dark teal" style="background:#0d2626"></button>
+            <button class="swatch" data-v="#2a0d12" title="bordeaux" style="background:#2a0d12"></button>
+            <button class="swatch" data-v="#0f2412" title="forest" style="background:#0f2412"></button>
+            <button class="swatch" data-v="#1d1035" title="night violet" style="background:#1d1035"></button>
             <button class="swatch" data-v="#f4f2ec" title="paper" style="background:#f4f2ec"></button>
           </div>
           <div class="small">windows:</div>
@@ -278,6 +287,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="swatch" data-v="#d9cd4e" title="yellow" style="background:#d9cd4e"></button>
             <button class="swatch" data-v="#e9e4cf" title="grey/cream" style="background:#e9e4cf"></button>
             <button class="swatch" data-v="#d9a441" title="ocker" style="background:#d9a441"></button>
+            <button class="swatch" data-v="#cfe0d2" title="mint" style="background:#cfe0d2"></button>
+            <button class="swatch" data-v="#e6d3d4" title="rosé" style="background:#e6d3d4"></button>
+            <button class="swatch" data-v="#ccd6de" title="sky grey" style="background:#ccd6de"></button>
             <button class="swatch" data-v="#f4f2ec" title="paper" style="background:#f4f2ec"></button>
           </div>
           <div class="small">cables:</div>
@@ -286,14 +298,33 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="swatch" data-v="#1233c8" title="blue" style="background:#1233c8"></button>
             <button class="swatch" data-v="#4a90d9" title="light blue" style="background:#4a90d9"></button>
             <button class="swatch" data-v="#c81111" title="red" style="background:#c81111"></button>
+            <button class="swatch" data-v="#e8791c" title="orange" style="background:#e8791c"></button>
             <button class="swatch" data-v="#57c94f" title="green" style="background:#57c94f"></button>
+            <button class="swatch" data-v="#ff6ad5" title="pink" style="background:#ff6ad5"></button>
+            <button class="swatch" data-v="#c77dff" title="purple" style="background:#c77dff"></button>
             <button class="swatch" data-v="#e8e6de" title="white" style="background:#e8e6de"></button>
             <button class="swatch" data-v="#0a0a0a" title="black" style="background:#0a0a0a"></button>
+            <button class="swatch" data-v="__rainbow" title="mixed · rainbow" style="background:linear-gradient(135deg,#e0473b 0 17%,#e8791c 17% 34%,#ffe94d 34% 50%,#57c94f 50% 67%,#4a90d9 67% 84%,#c77dff 84%)"></button>
             <button class="swatch" data-v="__mix" title="mixed" style="background:linear-gradient(135deg,#e0473b 0 25%,#e8c84d 25% 50%,#57c94f 50% 75%,#4a90d9 75%)"></button>
             <button class="swatch" data-v="__neon" title="mixed · neon" style="background:linear-gradient(135deg,#ff6ad5 0 25%,#5ad0e0 25% 50%,#c77dff 50% 75%,#8dff5a 75%)"></button>
             <button class="swatch" data-v="__chrome" title="mixed · chrome" style="background:linear-gradient(135deg,#d8dbe2 0 25%,#9aa3b0 25% 50%,#6b7280 50% 75%,#c0c6d0 75%)"></button>
           </div>
-          <button class="tinybtn" id="swreset">reset</button>
+          <div class="cfgrow small">
+            <label for="gridtoggle">grid</label>
+            <input type="checkbox" id="gridtoggle" checked />
+            <label for="sagslider" class="saglbl">sag</label>
+            <input type="range" id="sagslider" min="0" max="200" step="10" value="100" />
+            <span id="sagval">100%</span>
+          </div>
+          <div class="swrow btnrow">
+            <button class="tinybtn" id="swreset">reset</button>
+            <button class="tinybtn" id="swrnd" title="randomize colors">⚂</button>
+          </div>
+          <div class="swrow btnrow">
+            <button class="tinybtn" id="laysave" title="save current window layout">save layout</button>
+            <button class="tinybtn" id="laylock" title="lock window positions">lock</button>
+            <button class="tinybtn" id="layreset" title="restore default layout">reset layout</button>
+          </div>
         </div>
       </div>
     </div>
@@ -696,6 +727,20 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #vsrc { margin-top: 8px; }
 
       .swrow { display: flex; gap: 5px; flex-wrap: wrap; margin: 4px 0 8px; }
+      .preset {
+        padding: 1px 8px; font: inherit; font-size: 14px;
+        background: #efe9d8; border: 2px solid var(--border); color: #1a1503;
+        box-shadow: 2px 2px 0 var(--shadow);
+      }
+      .preset:active { transform: translate(1px, 1px); box-shadow: none; }
+      .preset.on { background: var(--border); color: var(--yb); }
+      .cfgrow { display: flex; align-items: center; gap: 7px; margin: 6px 0 8px; }
+      .cfgrow input[type='checkbox'] { accent-color: var(--cable); width: 14px; height: 14px; }
+      .cfgrow .saglbl { margin-left: 8px; }
+      .cfgrow input[type='range'] { flex: 1; min-width: 60px; accent-color: var(--cable); }
+      #sagval { min-width: 3em; text-align: right; }
+      .btnrow { gap: 6px; margin-bottom: 4px; }
+      .tinybtn.on { background: var(--border); color: var(--yb); }
       .swatch { width: 17px; height: 17px; padding: 0; border: 2px solid #000; }
       .swatch:hover, .swatch.on { outline: 2px solid #fff; }
 
@@ -840,6 +885,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         if (e.target.closest('.win-title button')) return;
         const grip = e.target.closest('.grip');
         const title = e.target.closest('.win-title');
+        if (prefs.lock && (grip || title)) return;
         dragged = false;
         if (grip) {
           armed = 'resize';
@@ -993,10 +1039,12 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         ['win-root', 'win-book'],
       ];
       const CABLE_SETS = {
+        __rainbow: ['#e0473b', '#e8791c', '#ffe94d', '#57c94f', '#4a90d9', '#c77dff', '#ff6ad5'],
         __mix: ['#e0473b', '#e8c84d', '#57c94f', '#4a90d9'],
         __neon: ['#ff6ad5', '#5ad0e0', '#c77dff', '#8dff5a'],
         __chrome: ['#d8dbe2', '#9aa3b0', '#6b7280', '#c0c6d0'],
       };
+      const sagF = () => (prefs.sag ?? 100) / 100;
       function drawCables() {
         if (!isWide()) { cablesEl.innerHTML = ''; return; }
         const raw = prefs.cable || '';
@@ -1021,7 +1069,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             x2 = B.offsetLeft; y2 = B.offsetTop + 22;
             const dist = Math.hypot(x2 - x1, y2 - y1);
             const bulge = Math.min(70 + dist * 0.18, 180);
-            const sag = Math.min(dist * 0.5, 380);
+            const sag = Math.min(dist * 0.5, 380) * sagF();
             d = `M${x1} ${y1} C${x1 - bulge} ${y1 + sag}, ${x2 - bulge} ${y2}, ${x2} ${y2}`;
           } else {
             const leftFirst = A.offsetLeft + A.offsetWidth / 2 <= B.offsetLeft + B.offsetWidth / 2;
@@ -1033,7 +1081,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             const dist = Math.hypot(dx, y2 - y1);
             // kurze kabel: kein durchhang -> glatte s-kurve statt gestauchter welle;
             // erst ab ~180px distanz beginnt das kabel durchzuhängen
-            const sag = Math.min(Math.max(0, dist - 180) * 0.42, 320);
+            const sag = Math.min(Math.max(0, dist - 180) * 0.42, 320) * sagF();
             const hoff = Math.min(Math.abs(dx) * 0.42 + 26, 175);
             d = `M${x1} ${y1} C${x1 + hoff * dir} ${y1 + sag}, ${x2 - hoff * dir} ${y2 + sag}, ${x2} ${y2}`;
           }
@@ -1453,8 +1501,94 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         for (const [rowId, key] of [['bgswatches', 'bg'], ['winswatches', 'win'], ['cableswatches', 'cable']]) {
           $(rowId).querySelectorAll('.swatch').forEach((s) => s.classList.toggle('on', (prefs[key] || '') === s.dataset.v));
         }
+        // grid + sag controls synchron halten
+        vp.style.backgroundImage = prefs.grid === false ? 'none' : '';
+        $('gridtoggle').checked = prefs.grid !== false;
+        $('sagslider').value = prefs.sag ?? 100;
+        $('sagval').textContent = (prefs.sag ?? 100) + '%';
+        // preset-markierung: exakt passende kombination hervorheben
+        document.querySelectorAll('.preset').forEach((b) => {
+          const p = PRESETS[b.dataset.p];
+          b.classList.toggle('on', (prefs.bg || '') === p.bg && (prefs.win || '') === p.win && (prefs.cable || '') === p.cable);
+        });
         savePrefs();
         drawCables();
+      }
+      // presets: eine kombination aus canvas/fenster/kabeln pro klick
+      const PRESETS = {
+        graphite: { bg: '', win: '', cable: '' },
+        blueprint: { bg: '#1e56b0', win: '__mix', cable: '#1233c8' },
+        parade: { bg: '#1a1a1a', win: '#e9e4cf', cable: '__rainbow' },
+      };
+      $('presetrow').addEventListener('click', (e) => {
+        const b = e.target.closest('.preset');
+        if (!b) return;
+        Object.assign(prefs, PRESETS[b.dataset.p]);
+        applyPrefs();
+      });
+      // randomize: nur kuratierte, garantiert lesbare kombinationen
+      const RND_POOL = [
+        { bg: '#0d2626', win: '#cfe0d2', cable: '#57c94f' },
+        { bg: '#1d1035', win: '#e6d3d4', cable: '#ff6ad5' },
+        { bg: '#2a0d12', win: '#e9e4cf', cable: '#e8791c' },
+        { bg: '#008080', win: '#f4f2ec', cable: '#ffe94d' },
+        { bg: '#0d1b3e', win: '#ccd6de', cable: '#4a90d9' },
+        { bg: '#1a1a1a', win: '#b9bdb2', cable: '__neon' },
+        { bg: '#0f2412', win: '#d9cd4e', cable: '#e8e6de' },
+        { bg: '#1e56b0', win: '#d9a441', cable: '#c81111' },
+        { bg: '#242424', win: '#e9e4cf', cable: '#c77dff' },
+      ];
+      $('swrnd').onclick = () => {
+        let pick;
+        do { pick = RND_POOL[Math.floor(Math.random() * RND_POOL.length)]; }
+        while (pick.bg === (prefs.bg || '') && pick.win === (prefs.win || ''));
+        Object.assign(prefs, pick);
+        applyPrefs();
+      };
+      // grid + sag
+      $('gridtoggle').addEventListener('change', (e) => {
+        if (e.target.checked) delete prefs.grid; else prefs.grid = false;
+        applyPrefs();
+      });
+      $('sagslider').addEventListener('input', (e) => {
+        prefs.sag = Number(e.target.value);
+        if (prefs.sag === 100) delete prefs.sag;
+        applyPrefs();
+      });
+
+      // ---------- layout: speichern / sperren / zurücksetzen ----------
+      $('laysave').onclick = () => {
+        const lay = {};
+        document.querySelectorAll('.win').forEach((w) => {
+          lay[w.id] = [w.offsetLeft, w.offsetTop, w.offsetWidth];
+        });
+        prefs.layout = lay;
+        savePrefs();
+        $('laysave').textContent = 'saved.';
+        setTimeout(() => ($('laysave').textContent = 'save layout'), 1200);
+      };
+      $('layreset').onclick = () => {
+        delete prefs.layout;
+        savePrefs();
+        location.reload();
+      };
+      const syncLock = () => $('laylock').classList.toggle('on', !!prefs.lock);
+      $('laylock').onclick = () => {
+        prefs.lock = !prefs.lock;
+        if (!prefs.lock) delete prefs.lock;
+        savePrefs();
+        syncLock();
+      };
+      syncLock();
+      // gespeichertes layout vor der start-kamera anwenden
+      if (prefs.layout) {
+        for (const [id, v] of Object.entries(prefs.layout)) {
+          const el = $(id);
+          if (!el || !Array.isArray(v)) continue;
+          el.style.left = v[0] + 'px';
+          el.style.top = v[1] + 'px';
+          if (el.classList.contains('resizable')) el.style.width = v[2] + 'px';
+        }
       }
       for (const [rowId, key] of [['bgswatches', 'bg'], ['winswatches', 'win'], ['cableswatches', 'cable']]) {
         $(rowId).addEventListener('click', (e) => {
