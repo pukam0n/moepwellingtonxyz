@@ -110,10 +110,12 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="trow" data-win="win-cc">├── <span class="ind">[ ]</span> character-creator/</button>
             <a class="trow charrow hidden" id="charsave-row" href="#" download="character.txt">│       ├── <u>save character.txt ↓</u></a>
             <a class="trow charrow" id="charimport-row" href={url('/character-creator/')}>│       └── <u>import character →</u></a>
+            <button class="trow" data-win="win-game">├── <span class="ind">[ ]</span> ground-forces.exe <span class="dim">[new]</span></button>
             <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
             <button class="trow" data-win="win-store">├── <span class="ind">[ ]</span> store/ <span class="dim">[soon]</span></button>
             <button class="trow" data-win="win-activity">├── <span class="ind">[ ]</span> activity.log</button>
             <button class="trow" data-win="win-book">├── <span class="ind">[ ]</span> residents.log</button>
+            <button class="trow" data-win="win-report">├── <span class="ind">[ ]</span> feedback.exe</button>
             <pre class="tree">│</pre>
           </div>
           <pre class="tree" set:html={bottomTree} />
@@ -159,7 +161,16 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
         </div>
 
-        <div class="win alt resizable" id="win-about" style="left:70px; top:825px; width:340px">
+        <div class="win" id="win-teaser" style="left:70px; top:890px; width:340px">
+          <div class="win-title"><span class="sq r"></span> ▒▒ new.gif ░▒</div>
+          <a id="teaser" href={url('/ground-forces/')}>
+            <span id="teasertxt">★ OUT NOW ★</span>
+            <svg id="teaserarrow" viewBox="0 0 100 56" aria-hidden="true"><polygon points="0,19 52,19 52,4 100,28 52,52 52,37 0,37" /></svg>
+            <span id="teasertxt2">!! click here !!</span>
+          </a>
+        </div>
+
+        <div class="win alt resizable" id="win-about" style="left:70px; top:1150px; width:340px">
           <div class="win-title"><span class="sq y"></span> ▓ about ▒░</div>
           <p class="small">
             i'm moe p. wellington, a 31-year-old artist from germany. i've been
@@ -189,13 +200,19 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div class="win" id="win-info" style="left:70px; top:1560px; width:280px">
+        <div class="win" id="win-info" style="left:70px; top:1720px; width:280px">
           <div class="win-title"><span class="sq r"></span> ░ info ▒▒</div>
           <p class="small"><a href={url('/info/impressum/')}>impressum</a> · <a href={url('/info/datenschutz/')}>datenschutz</a></p>
           <p class="dim small">© 2022–2026 moe p. wellington</p>
         </div>
 
-        <div class="win togglable" id="win-gen" style="left:510px; top:130px; width:300px">
+        <div class="win togglable" id="win-game" style="left:510px; top:80px; width:300px">
+          <div class="win-title"><span class="sq r"></span><span class="sq y"></span> ▓▒ ground-forces.exe ░</div>
+          <div class="small dim">wave defense · mpw-forge v0.9</div>
+          <a class="ccbtn gamebtn" href={url('/ground-forces/')}>PLAY →</a>
+        </div>
+
+        <div class="win togglable" id="win-gen" style="left:510px; top:215px; width:300px">
           <div class="win-title"><span class="sq r"></span> ▓▒ generate.exe ░▒</div>
           <div class="small dim">prompt:</div>
           <input id="genprompt" type="text" value="the work of art in the age of artificial reproduction" spellcheck="false" />
@@ -207,6 +224,15 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="win-title"><span class="sq y"></span><span class="sq b"></span> ▒▓ residents.log ░</div>
           <div class="small dim" id="bookline">opening the ledger…</div>
           <div id="bookscroll"></div>
+        </div>
+
+        <div class="win alt togglable hidden" id="win-report" style="left:2040px; top:1030px; width:300px" data-reg={REGISTRY}>
+          <div class="win-title"><span class="sq b"></span> ▒ feedback.exe ░</div>
+          <div class="small dim">bugs, ideas, greetings — straight to the archive.</div>
+          <textarea id="fbtext" rows="5" maxlength="2000" placeholder="type here…"></textarea>
+          <input id="fbhp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <button id="fbsend">SEND →</button>
+          <div class="small dim" id="fbstatus"></div>
         </div>
 
         <div class="win togglable hidden resizable" id="win-store" style="left:2040px; top:1200px; width:330px">
@@ -304,6 +330,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <button data-nav="-1">← prev</button>
           <span id="lbtitle"></span>
           <button data-nav="1">next →</button>
+          <button id="lblike" title="like">♥</button>
           <button id="lbrnd" title="random work from current selection">rnd ⚂</button>
           <button id="lbclose">esc close</button>
         </div>
@@ -516,6 +543,50 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #charimg.gen-3 { filter: invert(1); }
       #charimg.gen-4 { transform: scaleX(-1); filter: invert(1); }
 
+      /* teaser: 2000er blink-banner — pfeil zeigt zur game-spalte und
+         spiegelt sich, wenn das fenster auf die andere seite gezogen wird */
+      #teaser { display: block; text-align: center; text-decoration: none; padding: 2px 0 4px; }
+      #teasertxt {
+        display: block; font-size: 24px; letter-spacing: 3px; color: #c81111;
+        animation: tblink 0.5s steps(1) infinite;
+      }
+      #teaserarrow { display: block; width: 118px; margin: 0 auto; transform: rotate(-28deg); animation: tarrow 0.4s steps(1) infinite; }
+      #teaserarrow polygon { fill: #c81111; stroke: var(--border); stroke-width: 4; }
+      #teasertxt2 { font-size: 16px; text-decoration: underline; color: var(--text); animation: tblink 0.5s steps(1) 0.25s infinite; }
+      #win-teaser.flip #teaserarrow { transform: scaleX(-1) rotate(-28deg); }
+      #win-teaser.flip #teasertxt, #win-teaser.flip #teasertxt2 { visibility: hidden; }
+      @keyframes tblink { 0% { color: #c81111; } 50% { color: #e8a01c; } }
+      @keyframes tarrow { 0% { opacity: 1; } 50% { opacity: 0.3; } }
+      @media (prefers-reduced-motion: reduce) {
+        #teasertxt, #teasertxt2, #teaserarrow { animation: none; }
+      }
+
+      /* feedback.exe */
+      #fbtext {
+        display: block; width: 100%; margin-top: 6px; resize: vertical;
+        background: #efe9d8; border: 2px solid var(--border);
+        font: inherit; font-size: 15px; color: var(--text); padding: 4px 6px; outline: none;
+      }
+      #fbhp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+      #fbsend {
+        display: block; width: 100%; margin-top: 6px; padding: 4px 8px;
+        font-size: 18px; letter-spacing: 2px;
+        background: #c81111; color: #ffe94d; border: 2px solid var(--border);
+        box-shadow: 3px 3px 0 var(--shadow);
+      }
+      #fbsend:active { transform: translate(2px, 2px); box-shadow: none; }
+      #fbsend:disabled { opacity: 0.7; cursor: wait; }
+      #fbstatus { margin-top: 4px; min-height: 1.2em; }
+
+      /* likes: bewusst leise — ein herz, mehr nicht */
+      .likebtn {
+        background: none; border: none; padding: 0 2px; font: inherit;
+        font-size: 15px; color: var(--text); opacity: 0.45; flex-shrink: 0;
+      }
+      .likebtn:hover { opacity: 0.8; }
+      .likebtn.on { opacity: 1; color: #c81111; }
+      #lblike.on { color: #c81111; border-color: #c81111; }
+
       /* residents.log — gästebuch: kompakte zeilen, klick öffnet die akte */
       #bookscroll { max-height: 420px; overflow-y: auto; margin-top: 6px; }
       .bkrow {
@@ -576,7 +647,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       }
       /* einzelansicht: echtes seitenverhältnis, kein beschnitt (hoch-/querformat ok) */
       #vslots[data-slots='1'] img { aspect-ratio: auto; object-fit: contain; }
-      #vslots figcaption { font-size: 15px; padding-top: 2px; }
+      #vslots figcaption { font-size: 15px; padding-top: 2px; display: flex; align-items: baseline; gap: 8px; }
+      #vslots figcaption .cap { flex: 1; min-width: 0; }
       #vsrc { margin-top: 8px; }
 
       .swrow { display: flex; gap: 5px; flex-wrap: wrap; margin: 4px 0 8px; }
@@ -617,6 +689,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         #topbar { position: static; height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px 10px; white-space: normal; }
         #topbar .tb-title { width: 100%; font-size: 20px; }
         #topbar .sp, #helpbtn, #helpwin { display: none !important; }
+        #win-teaser { display: none !important; }
         /* viewer-leiste: slider mobil ausblenden (mehrspaltig ist auf dem
            handy sinnlos) — übrig bleibt stabil "prev · seite · next" */
         .slotlbl, #slots, #slotcount, .vbar .sp { display: none !important; }
@@ -767,10 +840,11 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       }, true);
 
       // ---------- fenster an/aus über das root-fenster ----------
-      const openState = prefs.open || { 'win-2026': true, 'win-activity': true, 'win-gen': true };
+      const openState = prefs.open || { 'win-2026': true, 'win-activity': true, 'win-gen': true, 'win-game': true };
       // neue standard-fenster für bestehende gespeicherte zustände nachrüsten
       if (!('win-activity' in openState)) openState['win-activity'] = true;
       if (!('win-gen' in openState)) openState['win-gen'] = true;
+      if (!('win-game' in openState)) openState['win-game'] = true;
       function applyOpen() {
         document.querySelectorAll('.togglable').forEach((w) =>
           w.classList.toggle('hidden', !openState[w.id])
@@ -855,8 +929,10 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         ['win-2025', 'win-viewer'], ['win-2026', 'win-viewer'],
         ['win-root', 'win-cc'], ['win-viewer', 'win-settings'],
         ['win-root', 'win-about', 'left'], ['win-root', 'win-info', 'left'],
+        ['win-root', 'win-game'],
         ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
         ['win-root', 'win-store'], ['win-store', 'win-info'],
+        ['win-root', 'win-report'],
         ['win-viewer', 'win-activity'],
         ['win-root', 'win-book'],
       ];
@@ -913,7 +989,35 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         }
         cablesEl.setAttribute('viewBox', `0 0 ${canvas.offsetWidth} ${canvas.offsetHeight}`);
         cablesEl.innerHTML = html;
+        // teaser-pfeil: spiegeln, sobald das fenster rechts der game-spalte hängt
+        const tw = $('win-teaser'), gw = $('win-game');
+        if (tw && gw) {
+          tw.classList.toggle('flip', tw.offsetLeft + tw.offsetWidth / 2 > gw.offsetLeft + gw.offsetWidth / 2);
+        }
       }
+
+      // ---------- likes: zähler auf dem worker, eigene likes im browser ----------
+      const LIKEREG = $('win-book')?.dataset.reg || '';
+      let likeCounts = {};
+      const myLikes = JSON.parse(localStorage.getItem('mpwLikes') || '{}');
+      const likeLabel = (slug) => '♥' + (likeCounts[slug] ? ' ' + likeCounts[slug] : '');
+      function toggleLike(slug) {
+        const on = !myLikes[slug];
+        if (on) myLikes[slug] = true; else delete myLikes[slug];
+        likeCounts[slug] = Math.max(0, (likeCounts[slug] || 0) + (on ? 1 : -1));
+        localStorage.setItem('mpwLikes', JSON.stringify(myLikes));
+        if (LIKEREG)
+          fetch(LIKEREG + '/like', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ slug, on }),
+          }).catch(() => {});
+      }
+      if (LIKEREG)
+        fetch(LIKEREG + '/likes')
+          .then((r) => r.json())
+          .then((j) => { likeCounts = j.likes || {}; renderViewer(); })
+          .catch(() => {});
 
       // ---------- viewer ----------
       // start: das aktuelle jahr (2026) komplett, nicht die selected works
@@ -931,7 +1035,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           .map(
             (w, i) => `<figure>
               <img src="${slots === 1 ? w.image : w.thumb}" alt="${w.title}" loading="lazy" data-idx="${page * slots + i}" />
-              <figcaption>${w.title} <span class="dim">— ${w.year}${w.note ? ' · ' + w.note : ''}</span></figcaption>
+              <figcaption><span class="cap">${w.title} <span class="dim">— ${w.year}${w.note ? ' · ' + w.note : ''}</span></span><button class="likebtn${myLikes[w.slug] ? ' on' : ''}" data-like="${w.slug}" title="like">${likeLabel(w.slug)}</button></figcaption>
             </figure>`
           )
           .join('');
@@ -992,12 +1096,21 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         lbimg.src = w.image;
         lbimg.alt = w.title;
         $('lbtitle').textContent = `${w.title} — ${w.year}${w.note ? ' · ' + w.note : ''}`;
+        $('lblike').textContent = likeLabel(w.slug);
+        $('lblike').classList.toggle('on', !!myLikes[w.slug]);
         // permalink: url zeigt aufs aktuelle werk, kann direkt geteilt werden
         history.replaceState(null, '', '#' + w.slug);
         if (!lb.open) lb.showModal();
       };
       lb.addEventListener('close', () => history.replaceState(null, '', location.pathname + location.search));
       $('vslots').addEventListener('click', (e) => {
+        const lk = e.target.closest('[data-like]');
+        if (lk) {
+          toggleLike(lk.dataset.like);
+          lk.classList.toggle('on');
+          lk.textContent = likeLabel(lk.dataset.like);
+          return;
+        }
         if (e.target.dataset.idx !== undefined) showLb(Number(e.target.dataset.idx));
       });
       lb.querySelectorAll('[data-nav]').forEach((b) => (b.onclick = () => showLb(lbIdx + Number(b.dataset.nav))));
@@ -1007,11 +1120,27 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         do { ni = Math.floor(Math.random() * selection.length); } while (ni === lbIdx);
         showLb(ni);
       };
+      $('lblike').onclick = () => {
+        const w = selection[lbIdx];
+        if (!w) return;
+        toggleLike(w.slug);
+        $('lblike').textContent = likeLabel(w.slug);
+        $('lblike').classList.toggle('on', !!myLikes[w.slug]);
+        renderViewer();
+      };
       $('lbclose').onclick = () => lb.close();
       lb.addEventListener('click', (e) => { if (e.target === lb) lb.close(); });
       lb.addEventListener('keydown', (e) => {
         if (e.key === 'ArrowLeft') showLb(lbIdx - 1);
         if (e.key === 'ArrowRight') showLb(lbIdx + 1);
+      });
+      // pfeiltasten blättern auch ohne vollbild — ausser in eingabefeldern
+      document.addEventListener('keydown', (e) => {
+        if (lb.open) return;
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+        if (e.key === 'ArrowLeft') { page = Math.max(0, page - 1); renderViewer(); }
+        else if (e.key === 'ArrowRight') { page++; renderViewer(); }
       });
 
       // ---------- generate.exe: der einzige generator, der nur findet ----------
@@ -1214,6 +1343,27 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           box.classList.remove('hidden');
         }
       })();
+
+      // ---------- feedback.exe ----------
+      $('fbsend').addEventListener('click', async () => {
+        const reg = $('win-report').dataset.reg;
+        const text = $('fbtext').value.trim();
+        if (text.length < 3) { $('fbstatus').textContent = 'say a little more.'; return; }
+        if (!reg) { $('fbstatus').textContent = 'local mode — nowhere to send.'; return; }
+        $('fbsend').disabled = true;
+        $('fbstatus').textContent = 'sending…';
+        try {
+          const r = await fetch(reg + '/feedback', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify({ text, url: location.pathname, website: $('fbhp').value }),
+          });
+          if (r.ok) { $('fbtext').value = ''; $('fbstatus').textContent = 'received. the archive remembers.'; }
+          else if (r.status === 429) $('fbstatus').textContent = 'easy — wait a few seconds.';
+          else $('fbstatus').textContent = 'refused. try again.';
+        } catch { $('fbstatus').textContent = 'unreachable. try again later.'; }
+        $('fbsend').disabled = false;
+      });
 
       // ---------- hilfe ----------
       $('helpbtn').onclick = () => {
