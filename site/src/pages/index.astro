@@ -161,13 +161,14 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
         </div>
 
-        <div class="win" id="win-teaser" style="left:70px; top:890px; width:195px">
-          <div class="win-title"><span class="sq r"></span> ▒ new.gif ░</div>
+        <div class="win" id="win-teaser" style="left:-115px; top:390px; width:195px">
+          <div class="win-title"><span class="tad">▶</span> new.gif <span class="sp"></span><button id="teaserx" title="close">×</button></div>
           <a id="teaser" href={url('/ground-forces/')}>
             <span class="tspark s1">✦</span><span class="tspark s2">✧</span><span class="tspark s3">✦</span><span class="tspark s4">✧</span>
             <span id="teasertxt">OUT NOW</span>
             <span id="tarrww"><svg id="teaserarrow" viewBox="0 0 100 56" aria-hidden="true"><polygon class="ta-body" points="0,19 52,19 52,4 100,28 52,52 52,37 0,37" /><polygon class="ta-shine" points="6,23 48,23 48,28 6,28" /></svg></span>
             <span id="teasertxt2">!! wow !!</span>
+            <span id="teasertxt3">100% free · no virus · trusted&trade;</span>
           </a>
         </div>
 
@@ -221,7 +222,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div id="bookscroll"></div>
         </div>
 
-        <div class="win alt togglable hidden" id="win-report" style="left:2040px; top:1030px; width:300px" data-reg={REGISTRY}>
+        <div class="win alt togglable hidden" id="win-report" style="left:2040px; top:990px; width:300px" data-reg={REGISTRY}>
           <div class="win-title"><span class="sq b"></span> ▒ feedback.exe ░</div>
           <div class="small dim">bugs, ideas, greetings — straight to the archive.</div>
           <textarea id="fbtext" rows="5" maxlength="2000" placeholder="type here…"></textarea>
@@ -230,7 +231,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="small dim" id="fbstatus"></div>
         </div>
 
-        <div class="win togglable hidden resizable" id="win-store" style="left:2040px; top:1200px; width:330px">
+        <div class="win togglable hidden resizable" id="win-store" style="left:2040px; top:1280px; width:330px">
           <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓░ store/ ▒░▓</div>
           {storeItems.map((it) => (
             <div class="stitem">
@@ -542,9 +543,24 @@ click artwork ····· fullscreen (←/→, esc)</pre>
          pumpender text, pulsierender pfeil mit lauflicht-shine. der pfeil
          spiegelt sich, wenn das fenster rechts vom portfolio hängt — der
          text bleibt dabei bewusst ungespiegelt lesbar */
+      /* popup-chrome: bewusst NICHT im look der anderen fenster — blauer
+         verlaufs-balken, weisse schrift, echtes X. leicht unseriös, subtil */
+      #win-teaser { background-color: #efe9d8; box-shadow: 5px 5px 0 rgba(0, 0, 0, 0.6); }
+      #win-teaser .win-title {
+        display: flex; align-items: center; gap: 6px;
+        background: linear-gradient(90deg, #1233c8, #4a90d9);
+        color: #fff; font-size: 15px;
+      }
+      #win-teaser .tad { font-size: 11px; color: #ffe94d; }
+      #teaserx {
+        width: 18px; height: 16px; line-height: 1; padding: 0; flex: none;
+        background: #c9c9c9; color: #1a1a1a; border: 1px solid;
+        border-color: #efefef #7d7d7d #7d7d7d #efefef; font-size: 13px;
+      }
+      #teaserx:hover { background: #c81111; color: #ffe94d; }
       #teaser {
         display: block; position: relative; overflow: hidden;
-        text-align: center; text-decoration: none; padding: 3px 0 5px;
+        text-align: center; text-decoration: none; padding: 3px 0 4px;
         background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.09) 0% 25%, transparent 0% 50%);
         background-size: 8px 8px;
       }
@@ -569,8 +585,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       }
       #tarrww { display: block; animation: tjig 0.5s steps(2) infinite; }
       @keyframes tjig { 0% { transform: translate(0, 0); } 50% { transform: translate(3px, -3px); } }
-      #teaserarrow { display: block; width: 96px; margin: 1px auto; transform: rotate(-28deg); }
-      #win-teaser.flip #teaserarrow { transform: scaleX(-1) rotate(-28deg); }
+      #teaserarrow { display: block; width: 114px; margin: 1px 6px 1px auto; transform: rotate(-24deg); }
+      #win-teaser.flip #teaserarrow { transform: scaleX(-1) rotate(-24deg); margin: 1px auto 1px 6px; }
       #win-teaser.flip #tarrww { animation-direction: reverse; }
       .ta-body { fill: #c81111; stroke: var(--border); stroke-width: 4; animation: tafill 0.8s steps(2) infinite; }
       @keyframes tafill { 0% { fill: #c81111; } 50% { fill: #e8501e; } }
@@ -579,6 +595,10 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #teasertxt2 {
         display: block; font-size: 15px; letter-spacing: 1px; color: var(--text);
         animation: tsp 0.7s steps(2) 0.1s infinite;
+      }
+      #teasertxt3 {
+        display: block; font-size: 11px; color: #7a7460; letter-spacing: 0.5px;
+        border-top: 1px dotted #9a9480; margin: 3px 6px 0; padding-top: 2px;
       }
       @media (prefers-reduced-motion: reduce) {
         #teasertxt, #teasertxt2, #tarrww, .tspark, .ta-body, .ta-shine { animation: none; }
@@ -611,7 +631,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #lblike.on { color: #c81111; border-color: #c81111; }
 
       /* residents.log — gästebuch: kompakte zeilen, klick öffnet die akte */
-      #bookscroll { max-height: 420px; overflow-y: auto; margin-top: 6px; }
+      /* höhe per grabber unten rechts selbst einstellbar */
+      #bookscroll { height: 240px; min-height: 80px; max-height: 560px; resize: vertical; overflow-y: auto; margin-top: 6px; }
       .bkrow {
         display: flex; gap: 8px; align-items: center; width: 100%;
         padding: 5px 2px; background: none; border: none; text-align: left;
@@ -772,7 +793,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       // jahresstapel), werden bewusst ignoriert — nur minX/maxX/minY zählen
       const fit = () => {
         const wins = [...document.querySelectorAll('.win')].filter(
-          (w) => !w.classList.contains('hidden') && w.id !== 'win-info'
+          (w) => !w.classList.contains('hidden') && w.id !== 'win-info' && w.id !== 'win-teaser'
         );
         if (!wins.length) return;
         const minX = Math.min(...wins.map((w) => w.offsetLeft));
@@ -803,6 +824,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       let downX = 0, downY = 0, dragged = false;
       vp.addEventListener('pointerdown', (e) => {
         if (!isWide()) return;
+        // buttons in titelleisten (z. b. das popup-X) nie als drag armen —
+        // pointer capture würde sonst deren click schlucken
+        if (e.target.closest('.win-title button')) return;
         const grip = e.target.closest('.grip');
         const title = e.target.closest('.win-title');
         dragged = false;
@@ -1364,6 +1388,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           box.classList.remove('hidden');
         }
       })();
+
+      // popup-werbung: X schliesst nur für diesen besuch — beim reload ist
+      // sie wieder da. genau wie früher.
+      $('teaserx').addEventListener('click', (e) => {
+        e.preventDefault();
+        $('win-teaser').classList.add('hidden');
+      });
 
       // ---------- feedback.exe ----------
       $('fbsend').addEventListener('click', async () => {
