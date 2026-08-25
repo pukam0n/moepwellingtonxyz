@@ -174,7 +174,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <div class="thumbrow" id="cullthumbs"></div>
             <div class="small dim" id="cullline"></div>
             <button class="loadbtn" id="cullload">load guest →</button>
-            <div class="cfgrow small" style="margin-top:8px"><span class="dim">kept — drag to reorder:</span><span class="sp"></span><button class="tinybtn" id="cullmax">◱ expand</button></div>
+            <div class="cfgrow small" style="margin-top:8px"><span class="dim">kept — drag to reorder:</span><span class="sp"></span><button class="tinybtn" id="cullmax">expand →</button></div>
             <div id="cullstrip"></div>
             <div class="cfgrow small">
               <span class="dim">generate:</span>
@@ -291,16 +291,29 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         </div>
 
         <div id="trashicon" class="empty" title="trash.bin">
-          <svg viewBox="0 0 34 40" aria-hidden="true">
-            <g class="t-paper"><polygon points="10,2 22,0 24,8 12,10" fill="#f4f2ec" stroke="#101010" stroke-width="1.5" /></g>
-            <rect x="13" y="4" width="8" height="3" fill="#c9c9c9" stroke="#101010" stroke-width="1.5" />
-            <rect x="4" y="7" width="26" height="4" fill="#c9c9c9" stroke="#101010" stroke-width="1.5" />
-            <path d="M6 11 L8 38 L26 38 L28 11 Z" fill="#b0b0b0" stroke="#101010" stroke-width="1.5" />
-            <line x1="12" y1="15" x2="13" y2="34" stroke="#7d7d7d" stroke-width="1.5" />
-            <line x1="17" y1="15" x2="17" y2="34" stroke="#7d7d7d" stroke-width="1.5" />
-            <line x1="22" y1="15" x2="21" y2="34" stroke="#7d7d7d" stroke-width="1.5" />
+          <svg viewBox="0 0 17 20" shape-rendering="crispEdges" aria-hidden="true">
+            <g class="t-paper">
+              <rect x="4" y="0" width="3" height="2" fill="#f4f2ec" /><rect x="5" y="0" width="1" height="1" fill="#a8a8a8" />
+              <rect x="11" y="0" width="2" height="2" fill="#f4f2ec" />
+            </g>
+            <rect x="6" y="0" width="5" height="2" fill="#000" /><rect x="7" y="0" width="3" height="1" fill="#dfdfdf" />
+            <rect x="2" y="2" width="13" height="2" fill="#000" /><rect x="3" y="2" width="11" height="1" fill="#dfdfdf" />
+            <rect x="3" y="4" width="11" height="15" fill="#000" />
+            <rect x="4" y="4" width="9" height="14" fill="#c0c0c0" />
+            <rect x="5" y="5" width="1" height="12" fill="#dfdfdf" />
+            <rect x="6" y="5" width="1" height="12" fill="#707070" />
+            <rect x="8" y="5" width="1" height="12" fill="#dfdfdf" />
+            <rect x="9" y="5" width="1" height="12" fill="#707070" />
+            <rect x="11" y="5" width="1" height="12" fill="#dfdfdf" />
+            <rect x="12" y="5" width="1" height="12" fill="#707070" />
           </svg>
           <div class="tlabel">trash.bin</div>
+        </div>
+
+        <div class="win hidden" id="win-kept" style="left:850px; top:470px; width:560px">
+          <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓▒ kept ── collection ░▒</div>
+          <div class="small dim" id="keptline">nothing kept yet.</div>
+          <div id="keptgrid"></div>
         </div>
 
         <div class="win alt hidden" id="win-trash" style="left:1400px; top:930px; width:280px">
@@ -722,10 +735,10 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       /* cull.exe — gast-kuration */
       #cullstrip { display: flex; flex-wrap: wrap; gap: 4px; max-height: 140px; overflow-y: auto; margin: 4px 0 2px; }
       .cullthumb { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: grab; -webkit-user-drag: element; user-drag: element; }
-      /* maximierte kept-ansicht: grosse thumbs zum ordnen */
-      #win-cull.max { width: 640px !important; }
-      #win-cull.max #cullstrip { max-height: 440px; }
-      #win-cull.max .cullthumb { width: 92px; height: 92px; }
+      /* kept-fenster: grosse thumbs, scrollbar, gleiche reorder-logik */
+      #keptgrid { display: flex; flex-wrap: wrap; gap: 6px; max-height: 520px; overflow-y: auto; margin-top: 6px; }
+      #keptgrid .cullthumb { width: 92px; height: 92px; }
+      #cullmax { background: #c81111; color: #ffe94d; }
       .cullthumb:active { cursor: grabbing; }
       #cullempty p, #cullstate .loadbtn { margin-bottom: 6px; }
       #cullzip:disabled { opacity: 0.55; cursor: default; }
@@ -733,14 +746,18 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       /* trash.bin — desktop-icon, bewusst stilbruch zu den fenstern */
       #trashicon {
         position: absolute; left: 1560px; top: 1180px; z-index: 8;
-        width: 72px; text-align: center; cursor: pointer; user-select: none;
+        width: 76px; text-align: center; cursor: pointer; user-select: none;
+        image-rendering: pixelated;
       }
-      #trashicon svg { width: 46px; display: block; margin: 0 auto; }
+      #trashicon svg { width: 51px; display: block; margin: 0 auto; }
       #trashicon .tlabel {
-        font-size: 14px; color: #e8e6de; margin-top: 2px;
-        text-shadow: 1px 1px 0 #101010;
+        display: inline-block; font-size: 13px; letter-spacing: 0;
+        color: #fff; margin-top: 1px; padding: 0 3px;
+        text-shadow: 1px 1px 0 #000;
       }
-      #trashicon:hover .tlabel { background: #1233c8; color: #fff; }
+      #trashicon:hover .tlabel, #trashicon.dragging .tlabel {
+        background: #1233c8; outline: 1px dotted #fff; text-shadow: none;
+      }
       #trashicon.empty .t-paper { display: none; }
       #trashgrid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 220px; overflow-y: auto; margin: 6px 0; }
       #trashgrid img { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: pointer; opacity: 0.75; }
@@ -971,7 +988,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         // pointer capture würde sonst deren click schlucken
         if (e.target.closest('.win-title button')) return;
         const grip = e.target.closest('.grip');
-        const title = e.target.closest('.win-title');
+        const icon = e.target.closest('#trashicon');
+        const title = icon || e.target.closest('.win-title');
         if (prefs.lock && (grip || title)) return;
         dragged = false;
         if (grip) {
@@ -981,7 +999,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           sx = e.clientX;
         } else if (title) {
           armed = 'win';
-          dragWin = title.closest('.win');
+          dragWin = icon || title.closest('.win');
           ox = (e.clientX - px) / z - dragWin.offsetLeft;
           oy = (e.clientY - py) / z - dragWin.offsetTop;
         } else if (e.target === vp || e.target === canvas || e.target === cablesEl) {
@@ -991,7 +1009,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         } else return;
         downX = e.clientX;
         downY = e.clientY;
-        vp.setPointerCapture(e.pointerId);
+        // fürs desktop-icon kein pointer capture — es würde den click
+        // (öffnen des trash-fensters) auf vp umleiten und schlucken
+        if (!icon) vp.setPointerCapture(e.pointerId);
       });
       vp.addEventListener('pointermove', (e) => {
         if (armed && !mode) {
@@ -1130,6 +1150,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         ['win-2025', 'win-viewer'], ['win-2026', 'win-viewer'],
         ['win-root', 'win-cc'], ['win-viewer', 'win-settings'],
         ['win-root', 'win-cull'], ['win-cull', 'win-viewer'],
+        ['win-cull', 'win-kept'],
         ['win-root', 'win-about', 'left'], ['win-root', 'win-info', 'left'],
         ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
         ['win-root', 'win-store'], ['win-store', 'win-info'],
@@ -1664,9 +1685,14 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           $('cullthumbs').innerHTML = guest.slice(0, 3)
             .map((g) => `<img src="${g.url}" alt="" loading="lazy" width="64" height="64" />`).join('');
           $('cullline').textContent = `${guest.length} images · ${keptOrder.length} kept · ${dropped} dropped · ${open} open`;
-          $('cullstrip').innerHTML = keptOrder.length
+          const stripHtml = keptOrder.length
             ? keptOrder.map((g, i) => `<img class="cullthumb" draggable="true" data-i="${i}" src="${g.url}" title="${esc(g.name)}" loading="lazy" />`).join('')
             : '<span class="small dim">nothing kept yet — press p in the viewer.</span>';
+          $('cullstrip').innerHTML = stripHtml;
+          $('keptgrid').innerHTML = stripHtml;
+          $('keptline').textContent = keptOrder.length
+            ? `${keptOrder.length} kept — drag to reorder. this is your collection order.`
+            : 'nothing kept yet — press p in the viewer.';
           $('cullzip').disabled = cullExportAll
             ? guest.every((g) => g.status === 'drop')
             : !keptOrder.length;
@@ -1706,9 +1732,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       $('cullexall').onclick = () => { cullExportAll = true; syncCullEx(); };
       syncCullEx();
       $('cullmax').onclick = () => {
-        $('win-cull').classList.toggle('max');
-        $('cullmax').textContent = $('win-cull').classList.contains('max') ? '◱ shrink' : '◱ expand';
-        layoutColumn();
+        $('win-kept').classList.toggle('hidden');
         drawCables();
       };
       // trash.bin: gedroppte bilder landen im mülleimer, klick restauriert
@@ -1752,24 +1776,29 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         }
         updateCull();
       };
-      // kept-strip: reihenfolge per drag&drop
+      // kept-reihenfolge per drag&drop — im strip und im kept-fenster
       let cullDragI = null;
-      $('cullstrip').addEventListener('dragstart', (e) => {
-        const t = e.target.closest('.cullthumb');
-        if (t) cullDragI = Number(t.dataset.i);
-      });
-      $('cullstrip').addEventListener('dragover', (e) => e.preventDefault());
-      $('cullstrip').addEventListener('drop', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const t = e.target.closest('.cullthumb');
-        if (!t || cullDragI === null) return;
-        const to = Number(t.dataset.i);
-        const [m] = keptOrder.splice(cullDragI, 1);
-        keptOrder.splice(to, 0, m);
-        cullDragI = null;
-        updateCull();
-      });
+      const bindReorder = (id) => {
+        const el2 = $(id);
+        el2.addEventListener('dragstart', (e) => {
+          const t = e.target.closest('.cullthumb');
+          if (t) cullDragI = Number(t.dataset.i);
+        });
+        el2.addEventListener('dragover', (e) => e.preventDefault());
+        el2.addEventListener('drop', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const t = e.target.closest('.cullthumb');
+          if (!t || cullDragI === null) return;
+          const to = Number(t.dataset.i);
+          const [m] = keptOrder.splice(cullDragI, 1);
+          keptOrder.splice(to, 0, m);
+          cullDragI = null;
+          updateCull();
+        });
+      };
+      bindReorder('cullstrip');
+      bindReorder('keptgrid');
       // zip-export: store-only zip komplett im browser gebaut (kein server)
       let CRC_T;
       function crc32(u8) {
@@ -1964,7 +1993,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       // ---------- layout: speichern / sperren / zurücksetzen ----------
       $('laysave').onclick = () => {
         const lay = {};
-        document.querySelectorAll('.win').forEach((w) => {
+        document.querySelectorAll('.win, #trashicon').forEach((w) => {
           lay[w.id] = [w.offsetLeft, w.offsetTop, w.offsetWidth];
         });
         prefs.layout = lay;
