@@ -112,6 +112,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <a class="trow charrow" id="charimport-row" href={url('/character-creator/')}>│       └── <u>import character →</u></a>
             <a class="trow charrow devonly hidden" href={url('/ground-forces/')}>├── <span class="ind">[ ]</span> <u>ground-forces.exe</u> <span class="dim">(alpha test)</span></a>
             <button class="trow" data-win="win-gen">├── <span class="ind">[ ]</span> generate.exe</button>
+            <button class="trow" data-win="win-cull">├── <span class="ind">[ ]</span> cull.exe</button>
             <button class="trow" data-win="win-store">├── <span class="ind">[ ]</span> store/ <span class="dim">[soon]</span></button>
             <button class="trow" data-win="win-activity">├── <span class="ind">[ ]</span> activity.log</button>
             <button class="trow" data-win="win-book">├── <span class="ind">[ ]</span> residents.log</button>
@@ -156,7 +157,32 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div class="win alt togglable hidden" id="win-cc" style="left:510px; top:1430px; width:250px">
+        <div class="win togglable hidden" id="win-cull" style="left:510px; top:1430px; width:300px">
+          <div class="win-title"><span class="sq b"></span><span class="sq r"></span> ▒▓ cull.exe ░</div>
+          <div id="cullempty">
+            <p class="small">curate your own images through this interface.</p>
+            <p class="small dim">nothing is uploaded — your images never leave this browser.</p>
+            <button class="loadbtn" id="cullpick">open folder →</button>
+            <input id="cullinput" type="file" webkitdirectory multiple hidden />
+            <input id="cullinput2" type="file" accept="image/*" multiple hidden />
+            <p class="small dim">or <a href="#" id="cullpick2">pick files</a> · drop a folder anywhere on this window</p>
+            <p class="small dim">in the viewer: <b>p</b> keep · <b>x</b> drop · ←/→ browse</p>
+          </div>
+          <div id="cullstate" class="hidden">
+            <div class="thumbrow" id="cullthumbs"></div>
+            <div class="small dim" id="cullline"></div>
+            <button class="loadbtn" id="cullload">load guest →</button>
+            <div class="small dim" style="margin-top:8px">kept — drag to reorder:</div>
+            <div id="cullstrip"></div>
+            <button class="loadbtn" id="cullzip">export zip →</button>
+            <div class="swrow btnrow">
+              <button class="tinybtn" id="cullrestore">restore drops</button>
+              <button class="tinybtn" id="cullclear">clear</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="win alt togglable hidden" id="win-cc" style="left:510px; top:1680px; width:250px">
           <div class="win-title"><span class="sq b"></span> ▒ character-creator ░</div>
           <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
         </div>
@@ -661,6 +687,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       .likebtn.on { opacity: 1; color: #c81111; }
       #lblike.on { color: #c81111; border-color: #c81111; }
 
+      /* cull.exe — gast-kuration */
+      #cullstrip { display: flex; flex-wrap: wrap; gap: 4px; max-height: 140px; overflow-y: auto; margin: 4px 0 2px; }
+      .cullthumb { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: grab; }
+      .cullthumb:active { cursor: grabbing; }
+      #cullempty p, #cullstate .loadbtn { margin-bottom: 6px; }
+      #cullzip:disabled { opacity: 0.55; cursor: default; }
+
       /* residents.log — gästebuch: kompakte zeilen, klick öffnet die akte */
       /* höhe per grabber unten rechts selbst einstellbar */
       #bookscroll { height: 240px; min-height: 80px; max-height: 560px; resize: vertical; overflow-y: auto; margin-top: 6px; }
@@ -1031,6 +1064,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         ['win-2022', 'win-viewer'], ['win-2023', 'win-viewer'], ['win-2024', 'win-viewer'],
         ['win-2025', 'win-viewer'], ['win-2026', 'win-viewer'],
         ['win-root', 'win-cc'], ['win-viewer', 'win-settings'],
+        ['win-root', 'win-cull'], ['win-cull', 'win-viewer'],
         ['win-root', 'win-about', 'left'], ['win-root', 'win-info', 'left'],
         ['win-root', 'win-gen'], ['win-gen', 'win-viewer'],
         ['win-root', 'win-store'], ['win-store', 'win-info'],
@@ -1139,7 +1173,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           .map(
             (w, i) => `<figure>
               <img src="${slots === 1 ? w.image : w.thumb}" alt="${w.title}" loading="lazy" data-idx="${page * slots + i}" />
-              <figcaption><span class="cap">${w.title} <span class="dim">— ${w.year}${w.note ? ' · ' + w.note : ''}</span></span><button class="likebtn${myLikes[w.slug] ? ' on' : ''}" data-like="${w.slug}" title="like">${likeLabel(w.slug)}</button></figcaption>
+              <figcaption><span class="cap">${w.title} <span class="dim">— ${w.year}${w.note ? ' · ' + w.note : ''}</span></span>${w.guest ? '' : `<button class="likebtn${myLikes[w.slug] ? ' on' : ''}" data-like="${w.slug}" title="like">${likeLabel(w.slug)}</button>`}</figcaption>
             </figure>`
           )
           .join('');
@@ -1202,8 +1236,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         $('lbtitle').textContent = `${w.title} — ${w.year}${w.note ? ' · ' + w.note : ''}`;
         $('lblike').textContent = likeLabel(w.slug);
         $('lblike').classList.toggle('on', !!myLikes[w.slug]);
-        // permalink: url zeigt aufs aktuelle werk, kann direkt geteilt werden
-        history.replaceState(null, '', '#' + w.slug);
+        $('lblike').style.display = w.guest ? 'none' : '';
+        // permalink: url zeigt aufs aktuelle werk (nicht für gast-bilder)
+        if (!w.guest) history.replaceState(null, '', '#' + w.slug);
         if (!lb.open) lb.showModal();
       };
       lb.addEventListener('close', () => history.replaceState(null, '', location.pathname + location.search));
@@ -1238,11 +1273,17 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         if (e.key === 'ArrowLeft') showLb(lbIdx - 1);
         if (e.key === 'ArrowRight') showLb(lbIdx + 1);
       });
-      // pfeiltasten blättern auch ohne vollbild — ausser in eingabefeldern
+      // pfeiltasten blättern auch ohne vollbild — ausser in eingabefeldern.
+      // im gast-modus (cull.exe): p/k = behalten, x = raus — wie beim culling
       document.addEventListener('keydown', (e) => {
-        if (lb.open) return;
         const t = e.target;
         if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA')) return;
+        const k = e.key.toLowerCase();
+        if (srcLabel === 'guest' && (k === 'p' || k === 'k' || k === 'x')) {
+          cullMark(k === 'x' ? 'drop' : 'keep');
+          return;
+        }
+        if (lb.open) return;
         if (e.key === 'ArrowLeft') { page = Math.max(0, page - 1); renderViewer(); }
         else if (e.key === 'ArrowRight') { page++; renderViewer(); }
       });
@@ -1453,6 +1494,209 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       $('teaserx').addEventListener('click', (e) => {
         e.preventDefault();
         $('win-teaser').classList.add('hidden');
+      });
+
+      // ---------- cull.exe: gast-kuration — alles bleibt im browser ----------
+      // bilder werden NIE hochgeladen: objekt-urls direkt aus den lokalen
+      // dateien, der viewer behandelt sie wie werke. p/k = keep, x = drop.
+      let guest = [], keptOrder = [], guestSeq = 0;
+      const guestWorks = () =>
+        guest
+          .filter((g) => g.status !== 'drop')
+          .map((g, i) => ({
+            slug: 'guest-' + i, guest: g, image: g.url, thumb: g.url,
+            title: (g.status === 'keep' ? '✓ ' : '') + g.name, year: 'guest', note: '',
+          }));
+      function loadGuest() {
+        selection = guestWorks();
+        srcLabel = 'guest';
+        page = 0;
+        renderViewer();
+      }
+      async function cullLoad(files) {
+        const imgs = [...files]
+          .filter((f) => /^image\//.test(f.type))
+          .sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+        if (!imgs.length) return;
+        guest.forEach((g) => URL.revokeObjectURL(g.url));
+        guest = imgs.map((f) => ({ file: f, name: f.name, url: URL.createObjectURL(f), status: '' }));
+        keptOrder = [];
+        guestSeq = 0;
+        updateCull();
+        loadGuest();
+      }
+      function cullMark(status) {
+        if (!guest.length) return;
+        const idx = lb.open ? lbIdx : Math.min(page * slots, selection.length - 1);
+        const w = selection[idx];
+        if (!w || !w.guest) return;
+        const g = w.guest;
+        g.status = status;
+        if (status === 'keep') {
+          if (!keptOrder.includes(g)) keptOrder.push(g);
+        } else {
+          keptOrder = keptOrder.filter((x) => x !== g);
+        }
+        const wasLb = lb.open;
+        selection = guestWorks();
+        if (!selection.length) {
+          if (wasLb) lb.close();
+          renderViewer();
+          updateCull();
+          return;
+        }
+        const ni = Math.min(status === 'drop' ? idx : idx + 1, selection.length - 1);
+        page = Math.floor(ni / slots);
+        renderViewer();
+        if (wasLb) showLb(ni);
+        updateCull();
+      }
+      function updateCull() {
+        const has = guest.length > 0;
+        $('cullempty').classList.toggle('hidden', has);
+        $('cullstate').classList.toggle('hidden', !has);
+        if (has) {
+          const dropped = guest.filter((g) => g.status === 'drop').length;
+          const open = guest.filter((g) => !g.status).length;
+          $('cullthumbs').innerHTML = guest.slice(0, 3)
+            .map((g) => `<img src="${g.url}" alt="" loading="lazy" width="64" height="64" />`).join('');
+          $('cullline').textContent = `${guest.length} images · ${keptOrder.length} kept · ${dropped} dropped · ${open} open`;
+          $('cullstrip').innerHTML = keptOrder.length
+            ? keptOrder.map((g, i) => `<img class="cullthumb" draggable="true" data-i="${i}" src="${g.url}" title="${esc(g.name)}" loading="lazy" />`).join('')
+            : '<span class="small dim">nothing kept yet — press p in the viewer.</span>';
+          $('cullzip').disabled = !keptOrder.length;
+        }
+        drawCables();
+      }
+      $('cullpick').onclick = () => $('cullinput').click();
+      $('cullpick2').addEventListener('click', (e) => { e.preventDefault(); $('cullinput2').click(); });
+      $('cullinput').addEventListener('change', (e) => cullLoad(e.target.files));
+      $('cullinput2').addEventListener('change', (e) => cullLoad(e.target.files));
+      $('win-cull').addEventListener('dragover', (e) => e.preventDefault());
+      $('win-cull').addEventListener('drop', (e) => {
+        e.preventDefault();
+        if (e.dataTransfer?.files?.length) cullLoad(e.dataTransfer.files);
+      });
+      $('cullload').onclick = loadGuest;
+      $('cullrestore').onclick = () => {
+        guest.forEach((g) => { if (g.status === 'drop') g.status = ''; });
+        if (srcLabel === 'guest') loadGuest();
+        updateCull();
+      };
+      $('cullclear').onclick = () => {
+        guest.forEach((g) => URL.revokeObjectURL(g.url));
+        guest = []; keptOrder = [];
+        if (srcLabel === 'guest') {
+          selection = DATA.byYear['2026'] || DATA.featured;
+          srcLabel = '2026';
+          page = 0;
+          renderViewer();
+        }
+        updateCull();
+      };
+      // kept-strip: reihenfolge per drag&drop
+      let cullDragI = null;
+      $('cullstrip').addEventListener('dragstart', (e) => {
+        const t = e.target.closest('.cullthumb');
+        if (t) cullDragI = Number(t.dataset.i);
+      });
+      $('cullstrip').addEventListener('dragover', (e) => e.preventDefault());
+      $('cullstrip').addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const t = e.target.closest('.cullthumb');
+        if (!t || cullDragI === null) return;
+        const to = Number(t.dataset.i);
+        const [m] = keptOrder.splice(cullDragI, 1);
+        keptOrder.splice(to, 0, m);
+        cullDragI = null;
+        updateCull();
+      });
+      // zip-export: store-only zip komplett im browser gebaut (kein server)
+      let CRC_T;
+      function crc32(u8) {
+        if (!CRC_T) {
+          CRC_T = new Int32Array(256);
+          for (let n = 0; n < 256; n++) {
+            let c = n;
+            for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+            CRC_T[n] = c;
+          }
+        }
+        let c = -1;
+        for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xff] ^ (c >>> 8);
+        return (c ^ -1) >>> 0;
+      }
+      async function buildZip(items) {
+        const enc = new TextEncoder();
+        const parts = [], central = [];
+        let offset = 0;
+        for (const it of items) {
+          const data = new Uint8Array(await it.file.arrayBuffer());
+          const nameB = enc.encode(it.name);
+          const crc = crc32(data);
+          const lh = new DataView(new ArrayBuffer(30));
+          lh.setUint32(0, 0x04034b50, true);
+          lh.setUint16(4, 20, true);
+          lh.setUint16(6, 0x0800, true);
+          lh.setUint32(14, crc, true);
+          lh.setUint32(18, data.length, true);
+          lh.setUint32(22, data.length, true);
+          lh.setUint16(26, nameB.length, true);
+          parts.push(lh.buffer, nameB, data);
+          const ch = new DataView(new ArrayBuffer(46));
+          ch.setUint32(0, 0x02014b50, true);
+          ch.setUint16(4, 20, true);
+          ch.setUint16(6, 20, true);
+          ch.setUint16(8, 0x0800, true);
+          ch.setUint32(16, crc, true);
+          ch.setUint32(20, data.length, true);
+          ch.setUint32(24, data.length, true);
+          ch.setUint16(28, nameB.length, true);
+          ch.setUint32(42, offset, true);
+          central.push(ch.buffer, nameB);
+          offset += 30 + nameB.length + data.length;
+        }
+        const cdSize = central.reduce((a, b) => a + b.byteLength, 0);
+        const eocd = new DataView(new ArrayBuffer(22));
+        eocd.setUint32(0, 0x06054b50, true);
+        eocd.setUint16(8, items.length, true);
+        eocd.setUint16(10, items.length, true);
+        eocd.setUint32(12, cdSize, true);
+        eocd.setUint32(16, offset, true);
+        return new Blob([...parts, ...central, eocd.buffer], { type: 'application/zip' });
+      }
+      $('cullzip').addEventListener('click', async () => {
+        if (!keptOrder.length) return;
+        $('cullzip').textContent = 'packing…';
+        $('cullzip').disabled = true;
+        try {
+          const chr = JSON.parse(localStorage.getItem('mpwCharacter') || 'null');
+          const txt = [
+            '== moepwellington.xyz — guest collection ==',
+            '',
+            `curated with cull.exe · ${new Date().toISOString().slice(0, 10)}`,
+            chr ? `curated by ${chr.name}${chr.klass ? ' — ' + chr.klass : ''}` : 'curated by an unnamed visitor',
+            `${keptOrder.length} works, in order:`,
+            ...keptOrder.map((g, i) => `${String(i + 1).padStart(3, '0')}  ${g.name}`),
+            '',
+            'your images never left your browser.',
+          ].join('\n');
+          const items = keptOrder.map((g, i) => ({
+            name: String(i + 1).padStart(3, '0') + '_' + g.name.replace(/[\\/]/g, '_'),
+            file: g.file,
+          }));
+          items.push({ name: 'collection.txt', file: new Blob([txt]) });
+          const blob = await buildZip(items);
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'collection.zip';
+          a.click();
+          setTimeout(() => URL.revokeObjectURL(a.href), 30000);
+        } finally {
+          $('cullzip').textContent = 'export zip →';
+          $('cullzip').disabled = false;
+        }
       });
 
       // ---------- feedback.exe ----------
