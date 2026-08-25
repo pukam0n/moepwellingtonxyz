@@ -147,6 +147,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <span class="dim small slotlbl">windows:</span>
             <input type="range" id="slots" min="1" max="4" step="1" value="1" />
             <span id="slotcount">1</span>
+            <span class="dim small hidden" id="guesthint">p keep · x drop · ←/→ browse</span>
             <span class="sp"></span>
             <button id="vprev" class="tinybtn">← prev</button>
             <span id="vpage" class="dim small">1/1</span>
@@ -157,7 +158,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div class="win togglable hidden" id="win-cull" style="left:510px; top:1430px; width:300px">
+        <div class="win togglable hidden" id="win-cull" style="left:810px; top:1195px; width:300px">
           <div class="win-title"><span class="sq b"></span><span class="sq r"></span> ▒▓ cull.exe ░</div>
           <div id="cullempty">
             <p class="small">curate your own images through this interface.</p>
@@ -174,6 +175,11 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <button class="loadbtn" id="cullload">load guest →</button>
             <div class="small dim" style="margin-top:8px">kept — drag to reorder:</div>
             <div id="cullstrip"></div>
+            <div class="cfgrow small">
+              <span class="dim">generate:</span>
+              <button class="tinybtn" id="cullgenrnd">rnd ⚂</button>
+              <button class="tinybtn" id="cullgennext">next →</button>
+            </div>
             <button class="loadbtn" id="cullzip">export zip →</button>
             <div class="swrow btnrow">
               <button class="tinybtn" id="cullrestore">restore drops</button>
@@ -182,7 +188,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           </div>
         </div>
 
-        <div class="win alt togglable hidden" id="win-cc" style="left:510px; top:1680px; width:250px">
+        <div class="win alt togglable hidden" id="win-cc" style="left:510px; top:1430px; width:250px">
           <div class="win-title"><span class="sq b"></span> ▒ character-creator ░</div>
           <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
         </div>
@@ -1178,6 +1184,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           )
           .join('');
         $('vpage').textContent = `${page + 1}/${pages}`;
+        $('guesthint').classList.toggle('hidden', srcLabel !== 'guest');
         $('vsrc').textContent = `source: ${srcLabel} · ${selection.length} ${selection.length === 1 ? 'work' : 'works'}`;
         $('slotcount').textContent = slots;
         document.querySelectorAll('.loadbtn').forEach((b) =>
@@ -1322,9 +1329,12 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             if (!selection.length) {
               log.textContent = 'nothing loaded. pick a year first.';
             } else {
-              const w = selection[Math.floor(Math.random() * selection.length)];
+              // guest mode kann generate auf "ein bild weiter" umschalten
+              const idx = srcLabel === 'guest' && cullGenNext
+                ? (page * slots + 1) % selection.length
+                : Math.floor(Math.random() * selection.length);
+              const w = selection[idx];
               log.textContent = `done. seed: ${Math.floor(Math.random() * 4294967296)} → viewer\n(honestly: this was made in ${w.year}. the machine only remembers.)`;
-              const idx = selection.indexOf(w);
               page = Math.floor(idx / slots);
               renderViewer();
             }
@@ -1500,6 +1510,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       // bilder werden NIE hochgeladen: objekt-urls direkt aus den lokalen
       // dateien, der viewer behandelt sie wie werke. p/k = keep, x = drop.
       let guest = [], keptOrder = [], guestSeq = 0;
+      let cullGenNext = false;
       const guestWorks = () =>
         guest
           .filter((g) => g.status !== 'drop')
@@ -1578,6 +1589,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         if (e.dataTransfer?.files?.length) cullLoad(e.dataTransfer.files);
       });
       $('cullload').onclick = loadGuest;
+      const syncCullGen = () => {
+        $('cullgenrnd').classList.toggle('on', !cullGenNext);
+        $('cullgennext').classList.toggle('on', cullGenNext);
+      };
+      $('cullgenrnd').onclick = () => { cullGenNext = false; syncCullGen(); };
+      $('cullgennext').onclick = () => { cullGenNext = true; syncCullGen(); };
+      syncCullGen();
       $('cullrestore').onclick = () => {
         guest.forEach((g) => { if (g.status === 'drop') g.status = ''; });
         if (srcLabel === 'guest') loadGuest();
