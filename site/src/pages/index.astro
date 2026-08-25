@@ -181,6 +181,12 @@ click artwork ····· fullscreen (←/→, esc)</pre>
               <button class="tinybtn" id="cullgenrnd">rnd ⚂</button>
               <button class="tinybtn" id="cullgennext">next →</button>
             </div>
+            <div class="cfgrow small">
+              <span class="dim">export:</span>
+              <button class="tinybtn" id="cullexkept">kept only</button>
+              <button class="tinybtn" id="cullexall">not dropped</button>
+            </div>
+            <p class="small dim" id="cullexnote"></p>
             <button class="loadbtn" id="cullzip">export zip →</button>
             <div class="swrow btnrow">
               <button class="tinybtn" id="cullrestore">restore drops</button>
@@ -1404,15 +1410,19 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         // end-semantik, lieferte konstant 0) kumulativ "von tag X bis heute"
         // nur mit start — die tageswerte entstehen als differenz benachbarter
         // summen. fehlerantworten zählen nie als 0, sondern kippen in demo
-        const fetchFrom = async (day) => {
-          const r = await fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json?start=${day}`);
+        const fetchCount = async (qs) => {
+          const r = await fetch(`https://${gc}.goatcounter.com/counter/TOTAL.json${qs}`);
           if (!r.ok) throw new Error('goatcounter http ' + r.status);
           const j = await r.json();
           return Number(String(j.count).replace(/\D/g, '')) || 0;
         };
-        let counts = null, live = false;
+        const fetchFrom = (day) => fetchCount(`?start=${day}`);
+        let counts = null, live = false, total = 0;
         if (gc) {
           try {
+            // gesamtzähler seit beginn (ohne zeitraum) — rückwirkend komplett
+            total = await fetchCount('');
+            await new Promise((res) => setTimeout(res, 300));
             const cums = [];
             for (const day of dayKeys) {
               cums.push(await fetchFrom(day));
@@ -1447,7 +1457,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         });
         $('actgraph').innerHTML = bars;
         const week = counts.slice(-7).reduce((a, b) => a + b, 0);
-        $('actline').textContent = `${week} visitors / last 7 days`;
+        $('actline').textContent = live
+          ? `${total} visitors / all time`
+          : `${week} visitors / last 7 days`;
         $('actsub').textContent = live
           ? `today: ${counts[counts.length - 1]} · via goatcounter, cookie-free`
           : gc
@@ -1616,7 +1628,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           $('cullstrip').innerHTML = keptOrder.length
             ? keptOrder.map((g, i) => `<img class="cullthumb" draggable="true" data-i="${i}" src="${g.url}" title="${esc(g.name)}" loading="lazy" />`).join('')
             : '<span class="small dim">nothing kept yet — press p in the viewer.</span>';
-          $('cullzip').disabled = !keptOrder.length;
+          $('cullzip').disabled = cullExportAll
+            ? guest.every((g) => g.status === 'drop')
+            : !keptOrder.length;
         }
         layoutColumn();
         drawCables();
@@ -1638,6 +1652,19 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       $('cullgenrnd').onclick = () => { cullGenNext = false; syncCullGen(); };
       $('cullgennext').onclick = () => { cullGenNext = true; syncCullGen(); };
       syncCullGen();
+      // export-modus: nur gepickte (p) — oder alles, was nicht gedroppt ist
+      let cullExportAll = false;
+      const syncCullEx = () => {
+        $('cullexkept').classList.toggle('on', !cullExportAll);
+        $('cullexall').classList.toggle('on', cullExportAll);
+        $('cullexnote').textContent = cullExportAll
+          ? 'exports everything you did not drop — picked first (your order), then the undecided.'
+          : 'exports only picked (p) images, in your order.';
+        updateCull();
+      };
+      $('cullexkept').onclick = () => { cullExportAll = false; syncCullEx(); };
+      $('cullexall').onclick = () => { cullExportAll = true; syncCullEx(); };
+      syncCullEx();
       $('cullrestore').onclick = () => {
         guest.forEach((g) => { if (g.status === 'drop') g.status = ''; });
         if (srcLabel === 'guest') loadGuest();
@@ -1727,7 +1754,10 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         return new Blob([...parts, ...central, eocd.buffer], { type: 'application/zip' });
       }
       $('cullzip').addEventListener('click', async () => {
-        if (!keptOrder.length) return;
+        const list = cullExportAll
+          ? [...keptOrder, ...guest.filter((g) => !g.status)]
+          : keptOrder;
+        if (!list.length) return;
         $('cullzip').textContent = 'packing…';
         $('cullzip').disabled = true;
         try {
@@ -1737,12 +1767,12 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             '',
             `curated with cull.exe · ${new Date().toISOString().slice(0, 10)}`,
             chr ? `curated by ${chr.name}${chr.klass ? ' — ' + chr.klass : ''}` : 'curated by an unnamed visitor',
-            `${keptOrder.length} works, in order:`,
-            ...keptOrder.map((g, i) => `${String(i + 1).padStart(3, '0')}  ${g.name}`),
+            `${list.length} works (${cullExportAll ? 'everything not dropped' : 'picked only'}), in order:`,
+            ...list.map((g, i) => `${String(i + 1).padStart(3, '0')}  ${g.name}`),
             '',
             'your images never left your browser.',
           ].join('\n');
-          const items = keptOrder.map((g, i) => ({
+          const items = list.map((g, i) => ({
             name: String(i + 1).padStart(3, '0') + '_' + g.name.replace(/[\\/]/g, '_'),
             file: g.file,
           }));
