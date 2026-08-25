@@ -173,13 +173,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div id="cullstate" class="hidden">
             <div class="thumbrow" id="cullthumbs"></div>
             <div class="small dim" id="cullline"></div>
-            <button class="loadbtn" id="cullload">load guest →</button>
-            <div class="cfgrow small" style="margin-top:8px"><span class="dim">kept — drag to reorder:</span><span class="sp"></span><button class="tinybtn" id="cullmax">expand →</button></div>
+            <button class="loadbtn" id="cullload">load your own work →</button>
+            <div class="cfgrow small" style="margin-top:8px"><span class="dim">kept:</span><span class="sp"></span><button class="tinybtn" id="cullmax" title="opens the kept collection window — view and reorder all picks">expand →</button></div>
             <div id="cullstrip"></div>
             <div class="cfgrow small">
-              <span class="dim">generate:</span>
-              <button class="tinybtn" id="cullgenrnd">rnd ⚂</button>
-              <button class="tinybtn" id="cullgennext">next →</button>
+              <span class="dim" title="sets what the big GENERATE button does while your images are loaded">generate:</span>
+              <button class="tinybtn" id="cullgenrnd" title="GENERATE shows a random image from your set">rnd ⚂</button>
+              <button class="tinybtn" id="cullgennext" title="GENERATE steps exactly one image forward">next →</button>
             </div>
             <div class="cfgrow small">
               <span class="dim">export:</span>
@@ -733,7 +733,13 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       #lblike.on { color: #c81111; border-color: #c81111; }
 
       /* cull.exe — gast-kuration */
-      #cullstrip { display: flex; flex-wrap: wrap; gap: 4px; max-height: 140px; overflow-y: auto; margin: 4px 0 2px; }
+      #cullstrip { display: flex; flex-wrap: wrap; gap: 4px; max-height: 92px; overflow: hidden; margin: 4px 0 2px; }
+      .cullthumb.static { cursor: default; }
+      .cullmore {
+        width: 40px; height: 40px; display: inline-flex; align-items: center;
+        justify-content: center; font-size: 14px; border: 2px dashed rgba(0, 0, 0, 0.35);
+        color: var(--text); opacity: 0.7;
+      }
       .cullthumb { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: grab; -webkit-user-drag: element; user-drag: element; }
       /* kept-fenster: grosse thumbs, scrollbar, gleiche reorder-logik */
       #keptgrid { display: flex; flex-wrap: wrap; gap: 6px; max-height: 520px; overflow-y: auto; margin-top: 6px; }
@@ -1685,11 +1691,17 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           $('cullthumbs').innerHTML = guest.slice(0, 3)
             .map((g) => `<img src="${g.url}" alt="" loading="lazy" width="64" height="64" />`).join('');
           $('cullline').textContent = `${guest.length} images · ${keptOrder.length} kept · ${dropped} dropped · ${open} open`;
-          const stripHtml = keptOrder.length
-            ? keptOrder.map((g, i) => `<img class="cullthumb" draggable="true" data-i="${i}" src="${g.url}" title="${esc(g.name)}" loading="lazy" />`).join('')
+          // kleiner strip: nur eine vorschau (max 2 reihen), reorder passiert
+          // im kept-fenster (expand)
+          const PEEK = 11;
+          $('cullstrip').innerHTML = keptOrder.length
+            ? keptOrder.slice(0, PEEK)
+                .map((g) => `<img class="cullthumb static" src="${g.url}" title="${esc(g.name)}" loading="lazy" />`)
+                .join('') + (keptOrder.length > PEEK ? `<span class="cullmore">+${keptOrder.length - PEEK}</span>` : '')
             : '<span class="small dim">nothing kept yet — press p in the viewer.</span>';
-          $('cullstrip').innerHTML = stripHtml;
-          $('keptgrid').innerHTML = stripHtml;
+          $('keptgrid').innerHTML = keptOrder.length
+            ? keptOrder.map((g, i) => `<img class="cullthumb" draggable="true" data-i="${i}" src="${g.url}" title="${esc(g.name)}" loading="lazy" />`).join('')
+            : '';
           $('keptline').textContent = keptOrder.length
             ? `${keptOrder.length} kept — drag to reorder. this is your collection order.`
             : 'nothing kept yet — press p in the viewer.';
@@ -1797,7 +1809,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           updateCull();
         });
       };
-      bindReorder('cullstrip');
       bindReorder('keptgrid');
       // zip-export: store-only zip komplett im browser gebaut (kein server)
       let CRC_T;
