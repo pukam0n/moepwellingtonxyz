@@ -174,7 +174,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <div class="thumbrow" id="cullthumbs"></div>
             <div class="small dim" id="cullline"></div>
             <button class="loadbtn" id="cullload">load guest →</button>
-            <div class="small dim" style="margin-top:8px">kept — drag to reorder:</div>
+            <div class="cfgrow small" style="margin-top:8px"><span class="dim">kept — drag to reorder:</span><span class="sp"></span><button class="tinybtn" id="cullmax">◱ expand</button></div>
             <div id="cullstrip"></div>
             <div class="cfgrow small">
               <span class="dim">generate:</span>
@@ -189,7 +189,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             <p class="small dim" id="cullexnote"></p>
             <button class="loadbtn" id="cullzip">export zip →</button>
             <div class="swrow btnrow">
-              <button class="tinybtn" id="cullrestore">restore drops</button>
               <button class="tinybtn" id="cullclear">clear</button>
             </div>
           </div>
@@ -289,6 +288,26 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           ))}
           <p class="small dim stnotice">{store.notice}</p>
           <div class="grip" title="resize"></div>
+        </div>
+
+        <div id="trashicon" class="empty" title="trash.bin">
+          <svg viewBox="0 0 34 40" aria-hidden="true">
+            <g class="t-paper"><polygon points="10,2 22,0 24,8 12,10" fill="#f4f2ec" stroke="#101010" stroke-width="1.5" /></g>
+            <rect x="13" y="4" width="8" height="3" fill="#c9c9c9" stroke="#101010" stroke-width="1.5" />
+            <rect x="4" y="7" width="26" height="4" fill="#c9c9c9" stroke="#101010" stroke-width="1.5" />
+            <path d="M6 11 L8 38 L26 38 L28 11 Z" fill="#b0b0b0" stroke="#101010" stroke-width="1.5" />
+            <line x1="12" y1="15" x2="13" y2="34" stroke="#7d7d7d" stroke-width="1.5" />
+            <line x1="17" y1="15" x2="17" y2="34" stroke="#7d7d7d" stroke-width="1.5" />
+            <line x1="22" y1="15" x2="21" y2="34" stroke="#7d7d7d" stroke-width="1.5" />
+          </svg>
+          <div class="tlabel">trash.bin</div>
+        </div>
+
+        <div class="win alt hidden" id="win-trash" style="left:1400px; top:930px; width:280px">
+          <div class="win-title"><span class="sq r"></span> ▒ trash.bin ░</div>
+          <div class="small dim" id="trashline">empty.</div>
+          <div id="trashgrid"></div>
+          <button class="tinybtn hidden" id="trashall">restore all</button>
         </div>
 
         <div class="win alt togglable" id="win-activity" style="left:2040px; top:120px; width:300px" data-gc={GOATCOUNTER}>
@@ -702,10 +721,30 @@ click artwork ····· fullscreen (←/→, esc)</pre>
 
       /* cull.exe — gast-kuration */
       #cullstrip { display: flex; flex-wrap: wrap; gap: 4px; max-height: 140px; overflow-y: auto; margin: 4px 0 2px; }
-      .cullthumb { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: grab; }
+      .cullthumb { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: grab; -webkit-user-drag: element; user-drag: element; }
+      /* maximierte kept-ansicht: grosse thumbs zum ordnen */
+      #win-cull.max { width: 640px !important; }
+      #win-cull.max #cullstrip { max-height: 440px; }
+      #win-cull.max .cullthumb { width: 92px; height: 92px; }
       .cullthumb:active { cursor: grabbing; }
       #cullempty p, #cullstate .loadbtn { margin-bottom: 6px; }
       #cullzip:disabled { opacity: 0.55; cursor: default; }
+
+      /* trash.bin — desktop-icon, bewusst stilbruch zu den fenstern */
+      #trashicon {
+        position: absolute; left: 1560px; top: 1180px; z-index: 8;
+        width: 72px; text-align: center; cursor: pointer; user-select: none;
+      }
+      #trashicon svg { width: 46px; display: block; margin: 0 auto; }
+      #trashicon .tlabel {
+        font-size: 14px; color: #e8e6de; margin-top: 2px;
+        text-shadow: 1px 1px 0 #101010;
+      }
+      #trashicon:hover .tlabel { background: #1233c8; color: #fff; }
+      #trashicon.empty .t-paper { display: none; }
+      #trashgrid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 220px; overflow-y: auto; margin: 6px 0; }
+      #trashgrid img { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: pointer; opacity: 0.75; }
+      #trashgrid img:hover { opacity: 1; outline: 2px solid #57c94f; }
 
       /* residents.log — gästebuch: kompakte zeilen, klick öffnet die akte */
       /* höhe per grabber unten rechts selbst einstellbar */
@@ -826,7 +865,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         #topbar { position: static; height: auto; flex-wrap: wrap; padding: 8px 12px; gap: 6px 10px; white-space: normal; }
         #topbar .tb-title { width: 100%; font-size: 20px; }
         #topbar .sp, #helpbtn, #helpwin { display: none !important; }
-        #win-teaser { display: none !important; }
+        #win-teaser, #trashicon, #win-trash { display: none !important; }
         /* viewer-leiste: slider mobil ausblenden (mehrspaltig ist auf dem
            handy sinnlos) — übrig bleibt stabil "prev · seite · next" */
         .slotlbl, #slots, #slotcount, .vbar .sp { display: none !important; }
@@ -1632,6 +1671,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             ? guest.every((g) => g.status === 'drop')
             : !keptOrder.length;
         }
+        updateTrash();
         layoutColumn();
         drawCables();
       }
@@ -1665,7 +1705,38 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       $('cullexkept').onclick = () => { cullExportAll = false; syncCullEx(); };
       $('cullexall').onclick = () => { cullExportAll = true; syncCullEx(); };
       syncCullEx();
-      $('cullrestore').onclick = () => {
+      $('cullmax').onclick = () => {
+        $('win-cull').classList.toggle('max');
+        $('cullmax').textContent = $('win-cull').classList.contains('max') ? '◱ shrink' : '◱ expand';
+        layoutColumn();
+        drawCables();
+      };
+      // trash.bin: gedroppte bilder landen im mülleimer, klick restauriert
+      function updateTrash() {
+        const dropped = guest.filter((g) => g.status === 'drop');
+        $('trashicon').classList.toggle('empty', !dropped.length);
+        $('trashline').textContent = dropped.length
+          ? `${dropped.length} in the bin — click to restore.`
+          : 'empty.';
+        $('trashgrid').innerHTML = dropped
+          .map((g) => `<img src="${g.url}" data-n="${esc(g.name)}" title="restore ${esc(g.name)}" loading="lazy" />`)
+          .join('');
+        $('trashall').classList.toggle('hidden', !dropped.length);
+      }
+      $('trashicon').addEventListener('click', () => {
+        $('win-trash').classList.toggle('hidden');
+        drawCables();
+      });
+      $('trashgrid').addEventListener('click', (e) => {
+        const im = e.target.closest('img');
+        if (!im) return;
+        const g = guest.find((x) => x.status === 'drop' && x.name === im.dataset.n);
+        if (!g) return;
+        g.status = '';
+        if (srcLabel === 'guest') { selection = guestWorks(); renderViewer(); }
+        updateCull();
+      });
+      $('trashall').onclick = () => {
         guest.forEach((g) => { if (g.status === 'drop') g.status = ''; });
         if (srcLabel === 'guest') loadGuest();
         updateCull();
