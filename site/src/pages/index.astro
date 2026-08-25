@@ -746,6 +746,8 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       .thumbrow img { width: 64px; height: 64px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; }
 
       .vbar { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+      /* guest mode: 1-window-lock — slider komplett ausblenden */
+      #win-viewer.guest .slotlbl, #win-viewer.guest #slots, #win-viewer.guest #slotcount { display: none; }
       /* feste breite, damit "9/39" -> "10/39" die zeile nicht umbrechen lässt */
       #vpage { min-width: 3.4em; text-align: center; }
       #slots { width: 90px; accent-color: var(--cable); }
@@ -1178,11 +1180,26 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       // ---------- viewer ----------
       // start: das aktuelle jahr (2026) komplett, nicht die selected works
       let selection = DATA.byYear['2026'] || DATA.featured, srcLabel = '2026', page = 0, slots = 1;
+      // guest mode: viewer locked auf 1 window + fenster skaliert aufs bild;
+      // beim verlassen werden slots und fensterbreite wiederhergestellt
+      let savedSlots = 0, savedViewerW = null;
       function renderViewer() {
         const el = $('vslots');
         // alte höhe festhalten, bis die neuen bilder geladen sind — sonst
         // kollabiert das fenster für einen frame und alles springt
         if (el.offsetHeight) el.style.minHeight = el.offsetHeight + 'px';
+        const g = srcLabel === 'guest';
+        $('win-viewer').classList.toggle('guest', g);
+        $('slots').disabled = g;
+        if (g) {
+          if (savedSlots === 0) savedSlots = slots;
+          slots = 1;
+          $('slots').value = 1;
+          if (savedViewerW === null) savedViewerW = $('win-viewer').style.width || '960px';
+        } else {
+          if (savedSlots) { slots = savedSlots; savedSlots = 0; $('slots').value = slots; }
+          if (savedViewerW !== null) { $('win-viewer').style.width = savedViewerW; savedViewerW = null; }
+        }
         el.dataset.slots = slots;
         const pages = Math.max(1, Math.ceil(selection.length / slots));
         page = Math.min(page, pages - 1);
@@ -1204,6 +1221,18 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         );
         // min-height erst lösen, wenn alle neuen bilder geladen sind
         const imgs = [...el.querySelectorAll('img')];
+        // guest: fensterbreite = bildbreite 1:1 (plus rahmen), links oben fix
+        if (g && imgs[0]) {
+          const sizeToImg = () => {
+            const nw = imgs[0].naturalWidth;
+            if (nw) {
+              $('win-viewer').style.width = Math.min(1700, Math.max(320, nw + 32)) + 'px';
+              drawCables();
+            }
+          };
+          if (imgs[0].complete) sizeToImg();
+          else imgs[0].addEventListener('load', sizeToImg, { once: true });
+        }
         let pending = imgs.filter((im) => !im.complete).length;
         const release = () => {
           el.style.minHeight = '';
