@@ -129,6 +129,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             class={`win yearwin togglable${i % 2 ? ' alt' : ''}${i === 0 ? '' : ' hidden'}`}
             id={`win-${year}`}
             style={`left:510px; top:${YEARTOP[year] ?? 425 + i * 220}px; width:240px`}
+            data-basetop={YEARTOP[year] ?? 425 + i * 220}
           >
             <div class="win-title"><span class="sq y"></span> {g(2)} {year}/ {g(3)}</div>
             <div class="thumbrow">
@@ -158,7 +159,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div class="win togglable hidden" id="win-cull" style="left:810px; top:1195px; width:300px">
+        <div class="win togglable hidden" id="win-cull" style="left:510px; top:425px; width:300px">
           <div class="win-title"><span class="sq b"></span><span class="sq r"></span> ▒▓ cull.exe ░</div>
           <div id="cullempty">
             <p class="small">curate your own images through this interface.</p>
@@ -188,7 +189,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           </div>
         </div>
 
-        <div class="win alt togglable hidden" id="win-cc" style="left:510px; top:1430px; width:250px">
+        <div class="win alt togglable hidden" id="win-cc" style="left:510px; top:1430px; width:250px" data-basetop="1430">
           <div class="win-title"><span class="sq b"></span> ▒ character-creator ░</div>
           <a class="ccbtn" href={url('/character-creator/')}>CREATE CHARACTER</a>
         </div>
@@ -987,10 +988,21 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       // neue standard-fenster für bestehende gespeicherte zustände nachrüsten
       if (!('win-activity' in openState)) openState['win-activity'] = true;
       if (!('win-gen' in openState)) openState['win-gen'] = true;
+      // die 510er-spalte ist dynamisch: ist cull.exe offen, schieben sich
+      // die jahresfenster (und der character-creator) um dessen höhe nach
+      // unten — zu, und 2026 steht wieder ganz oben
+      function layoutColumn() {
+        const cull = $('win-cull');
+        const off = cull && !cull.classList.contains('hidden') ? cull.offsetHeight + 50 : 0;
+        document.querySelectorAll('[data-basetop]').forEach((w) => {
+          w.style.top = Number(w.dataset.basetop) + off + 'px';
+        });
+      }
       function applyOpen() {
         document.querySelectorAll('.togglable').forEach((w) =>
           w.classList.toggle('hidden', !openState[w.id])
         );
+        layoutColumn();
         document.querySelectorAll('.trow[data-win]').forEach((b) => {
           const on = !!openState[b.dataset.win];
           b.querySelector('.ind').textContent = on ? '[x]' : '[ ]';
@@ -1577,6 +1589,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
             : '<span class="small dim">nothing kept yet — press p in the viewer.</span>';
           $('cullzip').disabled = !keptOrder.length;
         }
+        layoutColumn();
         drawCables();
       }
       $('cullpick').onclick = () => $('cullinput').click();
