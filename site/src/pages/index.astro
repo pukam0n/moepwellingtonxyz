@@ -290,39 +290,6 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           <div class="grip" title="resize"></div>
         </div>
 
-        <div id="trashicon" class="empty" title="trash.bin">
-          <svg viewBox="0 0 17 20" shape-rendering="crispEdges" aria-hidden="true">
-            <g class="t-paper">
-              <rect x="4" y="0" width="3" height="2" fill="#f4f2ec" /><rect x="5" y="0" width="1" height="1" fill="#a8a8a8" />
-              <rect x="11" y="0" width="2" height="2" fill="#f4f2ec" />
-            </g>
-            <rect x="6" y="0" width="5" height="2" fill="#000" /><rect x="7" y="0" width="3" height="1" fill="#dfdfdf" />
-            <rect x="2" y="2" width="13" height="2" fill="#000" /><rect x="3" y="2" width="11" height="1" fill="#dfdfdf" />
-            <rect x="3" y="4" width="11" height="15" fill="#000" />
-            <rect x="4" y="4" width="9" height="14" fill="#c0c0c0" />
-            <rect x="5" y="5" width="1" height="12" fill="#dfdfdf" />
-            <rect x="6" y="5" width="1" height="12" fill="#707070" />
-            <rect x="8" y="5" width="1" height="12" fill="#dfdfdf" />
-            <rect x="9" y="5" width="1" height="12" fill="#707070" />
-            <rect x="11" y="5" width="1" height="12" fill="#dfdfdf" />
-            <rect x="12" y="5" width="1" height="12" fill="#707070" />
-          </svg>
-          <div class="tlabel">trash.bin</div>
-        </div>
-
-        <div class="win hidden" id="win-kept" style="left:850px; top:470px; width:560px">
-          <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓▒ kept ── collection ░▒</div>
-          <div class="small dim" id="keptline">nothing kept yet.</div>
-          <div id="keptgrid"></div>
-        </div>
-
-        <div class="win alt hidden" id="win-trash" style="left:1400px; top:930px; width:280px">
-          <div class="win-title"><span class="sq r"></span> ▒ trash.bin ░</div>
-          <div class="small dim" id="trashline">empty.</div>
-          <div id="trashgrid"></div>
-          <button class="tinybtn hidden" id="trashall">restore all</button>
-        </div>
-
         <div class="win alt togglable" id="win-activity" style="left:2040px; top:120px; width:300px" data-gc={GOATCOUNTER}>
           <div class="win-title"><span class="sq y"></span> ▒ archive activity ░▓</div>
           <svg id="actgraph" viewBox="0 0 280 56" width="100%" aria-hidden="true"></svg>
@@ -413,6 +380,39 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       <hr class="chr" />
       <div id="charno" class="small dim"></div>
     </div>
+
+    <div id="trashicon" class="empty" title="trash.bin">
+          <svg viewBox="0 0 17 20" shape-rendering="crispEdges" aria-hidden="true">
+            <g class="t-paper">
+              <rect x="4" y="0" width="3" height="2" fill="#f4f2ec" /><rect x="5" y="0" width="1" height="1" fill="#a8a8a8" />
+              <rect x="11" y="0" width="2" height="2" fill="#f4f2ec" />
+            </g>
+            <rect x="6" y="0" width="5" height="2" fill="#000" /><rect x="7" y="0" width="3" height="1" fill="#dfdfdf" />
+            <rect x="2" y="2" width="13" height="2" fill="#000" /><rect x="3" y="2" width="11" height="1" fill="#dfdfdf" />
+            <rect x="3" y="4" width="11" height="15" fill="#000" />
+            <rect x="4" y="4" width="9" height="14" fill="#c0c0c0" />
+            <rect x="5" y="5" width="1" height="12" fill="#dfdfdf" />
+            <rect x="6" y="5" width="1" height="12" fill="#707070" />
+            <rect x="8" y="5" width="1" height="12" fill="#dfdfdf" />
+            <rect x="9" y="5" width="1" height="12" fill="#707070" />
+            <rect x="11" y="5" width="1" height="12" fill="#dfdfdf" />
+            <rect x="12" y="5" width="1" height="12" fill="#707070" />
+          </svg>
+          <div class="tlabel">trash.bin</div>
+        </div>
+
+        <div class="win hidden" id="win-kept" style="left:850px; top:470px; width:560px">
+          <div class="win-title"><span class="sq y"></span><span class="sq r"></span> ▓▒ kept ── collection ░▒</div>
+          <div class="small dim" id="keptline">nothing kept yet.</div>
+          <div id="keptgrid"></div>
+        </div>
+
+    <div class="win alt hidden" id="win-trash">
+          <div class="win-title"><span class="sq r"></span> ▒ trash.bin ░</div>
+          <div class="small dim" id="trashline">empty.</div>
+          <div id="trashgrid"></div>
+          <button class="tinybtn hidden" id="trashall">restore all</button>
+        </div>
 
     <div id="zoomctl">
       <button id="zoomout">−</button>
@@ -617,7 +617,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
          fixed, kamera-unabhängig; über die character-creator-zeile minimierbar.
          minimal: stats erst bei hover / klick aufs bild (wächst nach oben) */
       #charwin {
-        position: fixed; right: 16px; bottom: 68px; z-index: 90; width: 192px;
+        position: fixed; right: 16px; bottom: 168px; z-index: 90; width: 192px;
         background-color: var(--win-alt); border: 2px solid var(--border);
         box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.45), inset 0 0 0 2px rgba(255, 255, 255, 0.4);
         background-image: repeating-conic-gradient(rgba(0, 0, 0, 0.055) 0% 25%, transparent 0% 50%);
@@ -751,7 +751,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
 
       /* trash.bin — desktop-icon, bewusst stilbruch zu den fenstern */
       #trashicon {
-        position: absolute; left: 1560px; top: 1180px; z-index: 8;
+        position: fixed; right: 24px; bottom: 64px; z-index: 95;
         width: 76px; text-align: center; cursor: pointer; user-select: none;
         image-rendering: pixelated;
       }
@@ -765,6 +765,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         background: #1233c8; outline: 1px dotted #fff; text-shadow: none;
       }
       #trashicon.empty .t-paper { display: none; }
+      #win-trash { position: fixed; right: 230px; bottom: 64px; width: 280px; z-index: 96; }
+      #win-trash::before, #win-trash::after { display: none; }
+      #win-trash .win-title { cursor: default; }
       #trashgrid { display: flex; flex-wrap: wrap; gap: 4px; max-height: 220px; overflow-y: auto; margin: 6px 0; }
       #trashgrid img { width: 40px; height: 40px; object-fit: cover; border: 2px solid var(--border); background: #efe9d8; cursor: pointer; opacity: 0.75; }
       #trashgrid img:hover { opacity: 1; outline: 2px solid #57c94f; }
@@ -994,8 +997,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         // pointer capture würde sonst deren click schlucken
         if (e.target.closest('.win-title button')) return;
         const grip = e.target.closest('.grip');
-        const icon = e.target.closest('#trashicon');
-        const title = icon || e.target.closest('.win-title');
+        const title = e.target.closest('.win-title');
         if (prefs.lock && (grip || title)) return;
         dragged = false;
         if (grip) {
@@ -1005,7 +1007,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           sx = e.clientX;
         } else if (title) {
           armed = 'win';
-          dragWin = icon || title.closest('.win');
+          dragWin = title.closest('.win');
           ox = (e.clientX - px) / z - dragWin.offsetLeft;
           oy = (e.clientY - py) / z - dragWin.offsetTop;
         } else if (e.target === vp || e.target === canvas || e.target === cablesEl) {
@@ -1015,9 +1017,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         } else return;
         downX = e.clientX;
         downY = e.clientY;
-        // fürs desktop-icon kein pointer capture — es würde den click
-        // (öffnen des trash-fensters) auf vp umleiten und schlucken
-        if (!icon) vp.setPointerCapture(e.pointerId);
+        vp.setPointerCapture(e.pointerId);
       });
       vp.addEventListener('pointermove', (e) => {
         if (armed && !mode) {
@@ -1042,6 +1042,9 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         }
       });
       vp.addEventListener('pointerup', () => {
+        if (mode === 'win' && dragWin && AVOID.includes(dragWin.id)) {
+          avoidBase[dragWin.id] = dragWin.offsetLeft;
+        }
         mode = null;
         armed = null;
         dragWin = null;
@@ -1171,8 +1174,28 @@ click artwork ····· fullscreen (←/→, esc)</pre>
         __chrome: ['#d8dbe2', '#9aa3b0', '#6b7280', '#c0c6d0'],
       };
       const sagF = () => (prefs.sag ?? 100) / 100;
+      // die rechte spalte weicht dem viewer aus, statt überlappt zu werden:
+      // wächst der viewer (grosses bild, resize), rücken activity/settings/
+      // residents/feedback/store nach rechts — schrumpft er, zurück auf basis.
+      // ein fenster, das gerade selbst gezogen wird, bleibt unangetastet;
+      // nach dem drag wird seine neue position zur basis
+      const AVOID = ['win-activity', 'win-settings', 'win-book', 'win-report', 'win-store'];
+      const avoidBase = {};
+      function avoidViewer() {
+        const v = $('win-viewer');
+        if (!v || v.classList.contains('hidden')) return;
+        const vRight = v.offsetLeft + v.offsetWidth;
+        for (const id of AVOID) {
+          const w = $(id);
+          if (!w || w === dragWin) continue;
+          if (!(id in avoidBase)) avoidBase[id] = w.offsetLeft;
+          const target = Math.max(avoidBase[id], vRight + 50);
+          if (w.offsetLeft !== target) w.style.left = target + 'px';
+        }
+      }
       function drawCables() {
         if (!isWide()) { cablesEl.innerHTML = ''; return; }
+        avoidViewer();
         const raw = prefs.cable || '';
         const mixSet = CABLE_SETS[raw] || null;
         const single = mixSet
@@ -1761,8 +1784,34 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       }
       $('trashicon').addEventListener('click', () => {
         $('win-trash').classList.toggle('hidden');
-        drawCables();
       });
+      // icon frei verschiebbar (screen-space, mit drag-schwelle);
+      // ein echter drag unterdrückt den öffnen-click
+      (() => {
+        const ic = $('trashicon');
+        let offX = 0, offY = 0, moved = false, d0 = null;
+        ic.addEventListener('pointerdown', (e) => {
+          const r = ic.getBoundingClientRect();
+          offX = e.clientX - r.left;
+          offY = e.clientY - r.top;
+          moved = false;
+          d0 = [e.clientX, e.clientY];
+          ic.setPointerCapture(e.pointerId);
+        });
+        ic.addEventListener('pointermove', (e) => {
+          if (!d0) return;
+          if (!moved && Math.hypot(e.clientX - d0[0], e.clientY - d0[1]) < 4) return;
+          moved = true;
+          ic.style.left = e.clientX - offX + 'px';
+          ic.style.top = e.clientY - offY + 'px';
+          ic.style.right = 'auto';
+          ic.style.bottom = 'auto';
+        });
+        ic.addEventListener('pointerup', () => { d0 = null; });
+        ic.addEventListener('click', (e) => {
+          if (moved) { e.stopImmediatePropagation(); moved = false; }
+        }, true);
+      })();
       $('trashgrid').addEventListener('click', (e) => {
         const im = e.target.closest('img');
         if (!im) return;
@@ -2004,7 +2053,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
       // ---------- layout: speichern / sperren / zurücksetzen ----------
       $('laysave').onclick = () => {
         const lay = {};
-        document.querySelectorAll('.win, #trashicon').forEach((w) => {
+        document.querySelectorAll('.win:not(#win-trash)').forEach((w) => {
           lay[w.id] = [w.offsetLeft, w.offsetTop, w.offsetWidth];
         });
         prefs.layout = lay;
