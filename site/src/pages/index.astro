@@ -35,6 +35,7 @@ const g = (n) => '▓▒░■□▪ΘΞ§'.split('').sort(() => 0.5 - Math.sin(
 // unterer teil des root-baums: seiten-links + linktree (ersetzt das menü)
 const bottomTree = [
   `├── <a href="${url('/selected-works/')}">selected-works/</a>`,
+  `├── <a href="${url('/custom-terrain/')}">custom-terrain/</a>`,
   `├── <a href="${url('/about/')}">about/</a>`,
   `├── <a href="${url('/info/')}">info/</a>`,
   '│',
@@ -210,7 +211,7 @@ click artwork ····· fullscreen (←/→, esc)</pre>
           </a>
         </div>
 
-        <div class="win alt resizable" id="win-about" style="left:70px; top:895px; width:340px">
+        <div class="win alt resizable" id="win-about" style="left:70px; top:937px; width:340px">
           <div class="win-title"><span class="sq y"></span> ▓ about ▒░</div>
           <p class="small">
             i'm moe p. wellington, a 31-year-old artist from germany. i've been
