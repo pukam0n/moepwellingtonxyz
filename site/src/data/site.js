@@ -30,6 +30,7 @@ export const SITE = {
   socials: [
     { label: 'twitter/x', href: 'https://x.com/moepwellington' },
     { label: 'instagram', href: 'https://www.instagram.com/moepwellington' },
+    { label: 'manifold', href: 'https://manifold.xyz/@moepwellington' },
     { label: 'objkt', href: 'https://objkt.com/users/tz1YdveLn8id6Wk9X2JGsWsJj7qZodJ1XsKT/created' },
   ],
 };
